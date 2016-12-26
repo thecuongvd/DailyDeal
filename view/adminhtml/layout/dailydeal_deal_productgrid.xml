@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+ <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/layout_generic.xsd">
+    <container name="root" label="Root">
+        <block class="Magebuzz\Dailydeal\Block\Adminhtml\Deal\Edit\Tab\Products" name="deal_edit_tab_productgrid"/>
+    </container>
+</layout>

@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+ <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <dailydeal>
+            <general>
+                <enable>1</enable>
+                <include_jquery_lib>1</include_jquery_lib>
+                <show_previous_deals>1</show_previous_deals>
+                <show_upcoming_deals>1</show_upcoming_deals>
+                <show_share_buttons>1</show_share_buttons>
+                <sharing_template_message>Hurry Up! %s are on SALE before %s GMT on %s</sharing_template_message>
+                <allow_show_all_deals>1</allow_show_all_deals>
+                <deal_per_page>9,15,30</deal_per_page>
+                <position>leftsidebar</position>
+                <saving_number>1</saving_number>
+            </general>
+            <subscription>
+                <allow_subscribe>1</allow_subscribe>
+                <email_sender>general_contact</email_sender>
+                <email_template>dailydeal_subscription_email_template_default</email_template>
+                <intro_message>Please enter your email to receive notification about new daily deals.</intro_message>
+                <thankyou_message>Thank you for your subscription to our daily deal newsletter.</thankyou_message>
+            </subscription>
+        </dailydeal>
+    </default>
+</config>

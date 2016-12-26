@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+ <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magebuzz_Dailydeal::dailydeal" title="Dailydeal" module="Magebuzz_Dailydeal" sortOrder="20" resource="Magebuzz_Dailydeal::dailydeal" />
+        <add id="Magebuzz_Dailydeal::manage_deals" title="Manage Deals" module="Magebuzz_Dailydeal" sortOrder="1" parent="Magebuzz_Dailydeal::dailydeal" resource="Magebuzz_Dailydeal::manage_deals" action="dailydeal/deal" />
+        <add id="Magebuzz_Dailydeal::manage_subscribers" title="Manage Subscribers" module="Magebuzz_Dailydeal" sortOrder="2" parent="Magebuzz_Dailydeal::dailydeal" resource="Magebuzz_Dailydeal::manage_subscribers" action="dailydeal/subscriber" />
+        <add id="Magebuzz_Dailydeal::settings" title="Settings" module="Magebuzz_Dailydeal" sortOrder="3" parent="Magebuzz_Dailydeal::dailydeal" resource="Magebuzz_Dailydeal::settings" action="adminhtml/system_config/edit/section/dailydeal" />
+    </menu>
+</config>
