@@ -49,7 +49,7 @@ class InstallData implements InstallDataInterface
                 'input' => 'select',
                 'source' => 'Magento\Eav\Model\Entity\Attribute\Source\Boolean',
                 'required' => false,
-                'default' => '0',
+                'default' => '1',
                 'sort_order' => 110,
                 'global' => \Magento\Eav\Model\Entity\Attribute\ScopedAttributeInterface::SCOPE_GLOBAL,
                 'group' => 'General',

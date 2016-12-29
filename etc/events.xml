@@ -1,0 +1,11 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="catalog_product_get_final_price">
+        <observer name="magebuzz_dailydeal_product_get_final_price" instance="Magebuzz\Dailydeal\Observer\ProductGetFinalPrice" />
+    </event>
+    <event name="catalog_block_product_list_collection">
+        <observer name="magebuzz_dailydeal_product_list_get_final_price" instance="Magebuzz\Dailydeal\Observer\ProductListGetFinalPrice" />
+    </event>
+    <event name="sales_order_place_after">
+        <observer name="magebuzz_dailydeal_after_place_order" instance="Magebuzz\Dailydeal\Observer\AfterOrderPlacedSetDealQty" />
+    </event>
+</config>

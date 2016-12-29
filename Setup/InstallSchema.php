@@ -26,6 +26,7 @@ class InstallSchema implements InstallSchemaInterface
             ->addColumn('title', Table::TYPE_TEXT, 255, ['nullable' => false])
             ->addColumn('price', Table::TYPE_DECIMAL, '10,2', ['nullable' => false, 'default' => '0.00'])
             ->addColumn('quantity', Table::TYPE_INTEGER, 11, ['nullable' => false, 'default' => '0'])
+            ->addColumn('sold', Table::TYPE_INTEGER, 11, ['nullable' => false, 'default' => '0'])
             ->addColumn('product_id', Table::TYPE_INTEGER, 11, ['unsigned' => true, 'nullable' => false])
             ->addColumn('start_time', Table::TYPE_DATETIME, null, [])
             ->addColumn('end_time', Table::TYPE_DATETIME, null, [])
@@ -70,7 +71,7 @@ class InstallSchema implements InstallSchemaInterface
             )
             ->addColumn('customer_name', Table::TYPE_TEXT, 255, ['nullable' => false])
             ->addColumn('email', Table::TYPE_TEXT, 255, ['nullable' => false])
-            ->addColumn('status', Table::TYPE_SMALLINT, 6, ['unsigned' => true, 'nullable' => false, 'default' => '1'])
+            ->addColumn('status', Table::TYPE_SMALLINT, 6, ['unsigned' => true, 'nullable' => false, 'default' => '0'])
             ->addColumn('confirm_code', Table::TYPE_TEXT, 255, ['nullable' => false])
             ->setComment('Subscriber');
         $installer->getConnection()->createTable($table);

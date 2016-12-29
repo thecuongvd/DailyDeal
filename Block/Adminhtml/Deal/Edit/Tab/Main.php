@@ -159,7 +159,7 @@ class Main extends Generic
                 'label' => __('Status'),
                 'title' => __('Status'),
                 'required' => true,
-                'options' => ['1' => __('Enabled'), '2' => __('Disabled')],
+                'options' => [\Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED => __('Enabled'), \Magebuzz\Dailydeal\Model\Deal::STATUS_DISABLED => __('Disabled')],
                 'after_element_html' => $getJs,
             ]
         );

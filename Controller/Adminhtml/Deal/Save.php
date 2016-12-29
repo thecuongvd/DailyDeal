@@ -14,6 +14,7 @@ class Save extends \Magento\Backend\App\Action
     protected $_logger;
     protected $jsHelper;
     protected $_date;
+    protected $_subscriberFactory;
 
     public function __construct(
         Action\Context $context,
@@ -21,7 +22,8 @@ class Save extends \Magento\Backend\App\Action
         \Magento\MediaStorage\Model\File\UploaderFactory $fileUploaderFactory,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Backend\Helper\Js $jsHelper,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magebuzz\Dailydeal\Model\SubscriberFactory $subscriberFactory
     )
     {
         parent::__construct($context);
@@ -30,6 +32,7 @@ class Save extends \Magento\Backend\App\Action
         $this->_logger = $logger;
         $this->jsHelper = $jsHelper;
         $this->_date = $date;
+        $this->_subscriberFactory = $subscriberFactory;
     }
 
     /**
@@ -43,11 +46,11 @@ class Save extends \Magento\Backend\App\Action
         /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */
         $resultRedirect = $this->resultRedirectFactory->create();
         if ($data) {
-            $dealModel = $this->_objectManager->create('Magebuzz\Dailydeal\Model\Deal');
+            $deal = $this->_objectManager->create('Magebuzz\Dailydeal\Model\Deal');
             $id = $this->getRequest()->getParam('deal_id');
             if ($id) {
-                $dealModel->load($id);
-                if ($id != $dealModel->getId()) {
+                $deal->load($id);
+                if ($id != $deal->getId()) {
                     throw new \Magento\Framework\Exception\LocalizedException(__('The wrong deal is specified.'));
                 }
             }
@@ -100,7 +103,7 @@ class Save extends \Magento\Backend\App\Action
             $endTime = strtotime($data['end_time']);
             $progressStatus = '';
             if ($startTime > $nowTime) {
-                $progressStatus = 'upcoming';
+                $progressStatus = 'coming';
             } else if ($startTime <= $nowTime && $nowTime <= $endTime) {
                 $progressStatus = 'running';
             } else if ($endTime < $nowTime) {
@@ -108,18 +111,24 @@ class Save extends \Magento\Backend\App\Action
             }
             $data['progress_status'] = $progressStatus;
             
-            $dealModel->setData($data);
+            $deal->setData($data);
 
             $this->_eventManager->dispatch(
-                'dailydeal_deal_prepare_save', ['deal' => $dealModel, 'request' => $this->getRequest()]
+                'dailydeal_deal_prepare_save', ['deal' => $deal, 'request' => $this->getRequest()]
             );
 
             try {
-                $dealModel->save();
+                $deal->save();
                 $this->messageManager->addSuccess(__('You saved this Deal.'));
                 $this->_objectManager->get('Magento\Backend\Model\Session')->setFormData(false);
+                
+                //Send email to subscribers if create new
+                if (!$id) {
+                    $this->_subscriberFactory->create()->sendNewDealEmail($deal);
+                } 
+                
                 if ($this->getRequest()->getParam('back')) {
-                    return $resultRedirect->setPath('*/*/edit', ['deal_id' => $dealModel->getId(), '_current' => true]);
+                    return $resultRedirect->setPath('*/*/edit', ['deal_id' => $deal->getId(), '_current' => true]);
                 }
                 return $resultRedirect->setPath('*/*/');
             } catch (\Magento\Framework\Exception\LocalizedException $e) {

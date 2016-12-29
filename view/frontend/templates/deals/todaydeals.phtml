@@ -1,0 +1,72 @@
+<!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<?php
+$deals = $block->getPagedDeals();
+if ($deals->getSize()) {
+    $col = 4;
+    $helper = $block->getHelper();
+    $i = 0;
+    foreach ($deals as $deal) {
+        $deal->load($deal->getId());
+        $product = $deal->getProduct();
+        $dealQuantity = $deal->getQuantity() - $deal->getSold();
+        if ($product && $product->getId() && $dealQuantity > 0) {
+            $productQuantity = $helper->getProductQuantity($product);
+            if ($dealQuantity < $productQuantity) {
+                $leftText = __('For only ' . $dealQuantity . ' item(s)!');
+            } else {
+                $leftText = __('Until Out of Stock');
+            }
+            
+            $currentTime = $helper->getCurrentTime();
+            $endTime = strtotime($deal->getEndTime());
+
+            if ($i++ % $col == 0) {
+                ?>
+                <ul class="deal-grid">
+                <?php } ?>
+                <li class="item<?php if (($i - 1) % $col == 0) { ?> first<?php } else if ($i % $col == 0) { ?> last<?php } ?>">
+                    <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
+                        <img src="<?php echo $helper->getProductImageUrl($product, 'medium'); ?>" alt="<?php echo $product->getName() ?>" width="135"/>
+                        <div class="save-price">
+                            <div class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></div>
+                        </div>
+                    </a>
+                    <div class="deal-price">
+                        <div class="price-box">
+                            <p class="old-price">
+                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                            </p>
+                            <p class="special-price">
+                                <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
+                            </p>
+                        </div>
+                    </div>
+                    <h4><?php echo $leftText; ?></h4>
+                    <span id="timeleft_today_<?php echo $deal->getId() ?>" class="timeleft"> </span>
+                    <script type="text/javascript">
+                        require(['jquery', 'dailydeal'], function($) {
+                            $(document).ready(function () {
+                                var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
+                                dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
+                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft_today_<?php echo $deal->getId() ?>');
+                            });
+                        });
+                    </script>
+                    <h4 class="product-name"> 
+                        <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
+                    </h4>
+                </li>
+                <?php if ($i % $col == 0 || $i == count($deals)) { ?>
+                </ul>
+                <?php
+            }
+        }
+    }
+    echo $block->getPagerHtml();
+    ?>
+    <br/>
+    <!--<script type="text/javascript">decorateGeneric($$('ul.deal-grid'), ['odd', 'even', 'first', 'last'])</script>-->
+
+<?php } else { ?>
+    <p class="note-msg"><?php echo __('There are no deals available.') ?></p>
+<?php } ?>

@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="../../../../../../../lib/internal/Magento/Framework/View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Magebuzz_Dailydeal::css/dailydeal.css" />
+    </head>
+    <body>
+        <referenceContainer name="product.info.form.content">
+            <block class="Magebuzz\Dailydeal\Block\Product\Deal" name="dailydeal.product.social"
+                   template="product/social.phtml" before="product.info.addtocart" ifconfig="dailydeal/general/show_share_buttons" cacheable="false" />
+            <block class="Magebuzz\Dailydeal\Block\Product\Deal" name="dailydeal.product.deal"
+                   template="product/deal.phtml" after="dailydeal.product.social" cacheable="false" />
+        </referenceContainer>
+    </body>
+</page>

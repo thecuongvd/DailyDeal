@@ -99,6 +99,7 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                 $collection->addFieldToFilter('entity_id', ['nin' => $associatedProductIds]);
             }
             $collection->addAttributeToFilter('status', ['in' => $this->_productStatus->getVisibleStatusIds()]);
+//            $collection->addAttributeToFilter('is_deal', ['=' => 1]);
                 
             //Product In Stock
             $collection->getSelect()->distinct(true)->join(
@@ -106,6 +107,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                 'e.entity_id = stock_table.product_id',
                 [])
                 ->where('stock_table.stock_status = 1');
+            
+            $collection->setOrder('sort_order', 'ASC');
         }
         //Add Quantity of Product and quantity > 0
         if ($this->moduleManager->isEnabled('Magento_CatalogInventory')) {

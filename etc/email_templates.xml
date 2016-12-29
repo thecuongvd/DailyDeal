@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
  <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Email:etc/email_templates.xsd">
-    <template id="dailydeal_subscription_email_template" label="Default Email Template" file="default_email.html" type="html" module="Magebuzz_Dailydeal" area="frontend"/>
+    <template id="dailydeal_subscription_email_template" label="Default Email Template" file="default_subscription_email.html" type="html" module="Magebuzz_Dailydeal" area="frontend"/>
+    <template id="dailydeal_subscription_deal_notity_email_template" label="Default Email Template" file="deal_notity_email.html" type="html" module="Magebuzz_Dailydeal" area="frontend"/>
 </config>
 

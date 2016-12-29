@@ -1,0 +1,73 @@
+<!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<?php
+if ($block->isShowOnSidebar()) {
+    $deals = $block->getTodayDealCollection();
+    ?>
+    <?php if ($deals->getSize()) { 
+        $helper = $block->getHelper();
+        ?>
+        <div class="block block-todaydeals">
+            <div class="block-title"><h3><?php echo __('Today Deals'); ?></h3></div>
+            <div class="block-content">
+                <table id="sidebar-deal-list">
+                    <?php
+                    foreach ($deals as $deal) {
+                        $deal->load($deal->getId());
+                        $product = $deal->getProduct();
+                        if ($product && $product->getId() && $deal->getProductQty() > 0) {
+                            $currentTime = $helper->getCurrentTime();
+                            $endTime = strtotime($deal->getEndTime());
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="product-deal-image">
+                                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
+                                            <img src="<?php echo $helper->getProductImageUrl($product, 'small'); ?>" alt="<?php echo $product->getName(); ?>" />
+                                        </a>
+                                    </div>
+                                    <div class="product-deal-name">
+                                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
+                                            <?php echo $product->getName(); ?>
+                                        </a>
+                                    </div>
+                                    <div class="deal-price">
+                                        <div class="price-box">
+                                            <label><?php echo __('Price:') ?> </label>
+                                            <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                                            <span class="special-price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
+                                        </div>
+                                    </div>
+                                    <div class="save-price">
+                                        <label><?php echo __('Save:') ?> </label>
+                                        <span class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></span>
+                                    </div>
+                                    <div class="timeleft-block">
+                                        <label><?php echo __('DEAL TIME') ?></label>
+                                        <span id="timeleft_sidebar_<?php echo $deal->getId() ?>" class="timeleft"> </span>
+                                    </div>
+                                    <script type="text/javascript">
+                                        require(['jquery', 'dailydeal'], function($) {
+                                            $(document).ready(function () {
+                                                var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
+                                                dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
+                                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft_sidebar_<?php echo $deal->getId() ?>');
+                                            });
+                                        });
+                                    </script>
+                                    <p><button type="button" title="<?php echo __('Add to Cart') ?>" class="action primary btn-cart" onclick="setLocation('<?php echo $block->getAddToCartUrl($product) ?>')"><span><span><?php echo __('Add to Cart') ?></span></span></button></p>
+                                </td>
+                            </tr>
+                            <?php
+                        }
+                    }
+                    ?>
+                </table>
+                <!--<script type="text/javascript"> decorateTable('sidebar-deal-list');</script>-->
+            </div>
+        </div>
+        <?php
+    } else {
+        ?>
+        <p><?php echo __('There is no deal available today'); ?></p>
+    <?php } ?>
+<?php } ?>

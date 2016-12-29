@@ -10,7 +10,6 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     const STATUS_ENABLED = 1;
     const STATUS_DISABLED = 0;
     
-    const XML_PATH_SUBSCRIPTION_EMAIL = 'dailydeal/subscription/email_template';
     /**
      * CMS page cache tag
      */
@@ -24,17 +23,8 @@ class Deal extends \Magento\Framework\Model\AbstractModel
      * @var string
      */
     protected $_dealPrefix = 'dailydeal_deal';
-
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
-
-    protected $_storeManager;
+    
     protected $_scopeConfig;
-    protected $_transportBuilder;
-    protected $inlineTranslation;
-    protected $urlModel;
     protected $_productFactory;
     protected $_stockItem;
     protected $_date;
@@ -44,32 +34,22 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     public function __construct(
         \Magento\Framework\Model\Context $context,
         \Magento\Framework\Registry $registry,
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
-        \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
-        \Magento\Framework\UrlFactory $urlFactory,
         \Magento\Catalog\Model\ProductFactory $productFactory,
         \Magento\CatalogInventory\Api\StockStateInterface $stockItem,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Psr\Log\LoggerInterface $logger,
         \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = [])
     {
-        $this->_storeManager = $storeManager;
         $this->_scopeConfig = $scopeConfig;
-        $this->_transportBuilder = $transportBuilder;
-        $this->inlineTranslation = $inlineTranslation;
-        $this->urlModel = $urlFactory->create();
         $this->_productFactory = $productFactory;
         $this->stockItem = $stockItem;
         $this->_date = $date;
         $this->_dailydealHelper = $dailydealHelper;
         $this->_formKey = $formKey;
-        $this->logger = $logger;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -86,13 +66,13 @@ class Deal extends \Magento\Framework\Model\AbstractModel
                 ];
     }
     
-    public function getProduct() {
-        $product = $this->_productFactory->create()->load($this->getProductId());
-        if ($product->getId()) {
-            return $product;
-        }
-        return null;
-    }
+//    public function getProduct() {
+//        $product = $this->_productFactory->create()->load($this->getProductId());
+//        if ($product->getId()) {
+//            return $product;
+//        }
+//        return null;
+//    }
 
     public function getProductPrice()
     {
@@ -110,6 +90,42 @@ class Deal extends \Magento\Framework\Model\AbstractModel
             return $this->stockItem->getStockQty($productId, $product->getStore()->getWebsiteId());
         } 
         return 0;
+    }
+    
+    public function loadByProductId($productId) {
+        $dealId = $this->getResource()->getDealByProductId($productId);
+        return $this->load($dealId);
+    }
+    
+    public function getScopeConfig($path)
+    {
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+    }
+    
+    public function calSaving() {
+        $isRoundSaving = $this->getScopeConfig('dailydeal/general/is_round_saving');
+        $product = $this->getProduct();
+        if ($product && $product->getFinalPrice() > 0) {
+            $decrease = floatval($product->getFinalPrice()) - floatval($this->getPrice());
+            if ($isRoundSaving) {
+                $saving = round(100 * $decrease / floatval($product->getFinalPrice()), 0);
+            } else {
+                $saving = round(100 * $decrease / floatval($product->getFinalPrice()), 2);
+            }
+        } else {
+            $saving = 0;
+        }
+        return $saving;
+    }
+    
+    public function isAvailable() {
+        $nowTime = $this->_dailydealHelper->getCurrentTime() ;
+        $startTime = strtotime($this->getStartTime());
+        $endTime = strtotime($this->getEndTime());
+        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && (($this->getQuantity() - $this->getSold()) > 0) && ($startTime <= $nowTime) && ($nowTime <= $endTime)) {
+            return true;
+        }
+        return false;
     }
 
 }

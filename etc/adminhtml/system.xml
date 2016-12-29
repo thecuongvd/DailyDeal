@@ -17,38 +17,36 @@
                     <label>Enable deal</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="include_jquery_lib" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Include jquery library</label>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="show_previous_deals" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="show_previous_deals" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Show previous deals</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="show_upcoming_deals" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Show upcoming deals</label>
+                <field id="show_coming_deals" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show coming deals</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="show_share_buttons" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="show_share_buttons" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Show share buttons</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="sharing_template_message" translate="label" type="textarea" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="sharing_template_message" translate="label" type="textarea" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Social sharing template message</label>
+                    <depends>
+                        <field id="show_share_buttons">1</field>
+                    </depends>
                 </field>
-                <field id="allow_show_all_deals" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+<!--                <field id="allow_show_all_deals" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Allow to show all Deals</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="deal_per_page" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="deal_per_page" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Deals per Page on Grid Allowed</label>
+                </field>-->
+                <field id="show_on_sidebar" translate="label" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Today Deals on Sidebar</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="position" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Show Today Deals on</label>
-                    <source_model>Magebuzz\Dailydeal\Model\Config\Source\Position</source_model>
-                </field>
-                <field id="saving_number" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="is_round_saving" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Round up saving number</label>
                     <comment><![CDATA[Saving number will show as integer without decimal places.]]></comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
@@ -69,14 +67,10 @@
                     <label>Email Template for email list</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
                 </field>
-                <field id="intro_message" translate="label" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="intro_message" translate="label" type="textarea" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Intro message</label>
                     <comment><![CDATA[The message which show in popup to customer enter email]]></comment>
                 </field>
-                <field id="thankyou_message" translate="label" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Thank you message</label>
-                </field>
-                
             </group>
         </section>
     </system>

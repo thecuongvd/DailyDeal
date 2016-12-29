@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+ <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Magebuzz_Dailydeal::css/dailydeal_sidebar.css"/>
+    </head>
+    <body>
+    	<referenceBlock name="header.links">
+            <block class="Magebuzz\Dailydeal\Block\HeaderLink" name="dailydeal-header-link" template="dailydeal_header_link.phtml" before="-"/>
+        </referenceBlock>
+        <referenceContainer name="sidebar.main">
+            <block class="Magebuzz\Dailydeal\Block\Sidebar" name="dailydeal_sidebar" template="dailydeal_sidebar.phtml"
+                ifconfig="dailydeal/general/show_on_sidebar" before="-" />
+        </referenceContainer>
+    </body>
+</page>
