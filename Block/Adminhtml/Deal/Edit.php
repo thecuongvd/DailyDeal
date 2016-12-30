@@ -52,7 +52,7 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
                 'class' => 'save',
                 'data_attribute' => [
                     'mage-init' => [
-                        'button' => ['deal' => 'saveAndContinueEdit', 'target' => '#edit_form'],
+                        'button' => ['event' => 'saveAndContinueEdit', 'target' => '#edit_form'],
                     ],
                 ]
             ], -100

@@ -78,4 +78,11 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
         return $this;
     }
     
+    public function setRemain() {
+        $this->getSelect()
+                ->where('(main_table.quantity - main_table.sold) > 0');
+        return $this;
+    }
+    
+    
 }

@@ -14,7 +14,6 @@ class Save extends \Magento\Backend\App\Action
     protected $_logger;
     protected $jsHelper;
     protected $_date;
-    protected $_subscriberFactory;
 
     public function __construct(
         Action\Context $context,
@@ -22,8 +21,7 @@ class Save extends \Magento\Backend\App\Action
         \Magento\MediaStorage\Model\File\UploaderFactory $fileUploaderFactory,
         \Psr\Log\LoggerInterface $logger,
         \Magento\Backend\Helper\Js $jsHelper,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date,
-        \Magebuzz\Dailydeal\Model\SubscriberFactory $subscriberFactory
+        \Magento\Framework\Stdlib\DateTime\DateTime $date
     )
     {
         parent::__construct($context);
@@ -32,7 +30,6 @@ class Save extends \Magento\Backend\App\Action
         $this->_logger = $logger;
         $this->jsHelper = $jsHelper;
         $this->_date = $date;
-        $this->_subscriberFactory = $subscriberFactory;
     }
 
     /**
@@ -121,12 +118,6 @@ class Save extends \Magento\Backend\App\Action
                 $deal->save();
                 $this->messageManager->addSuccess(__('You saved this Deal.'));
                 $this->_objectManager->get('Magento\Backend\Model\Session')->setFormData(false);
-                
-                //Send email to subscribers if create new
-                if (!$id) {
-                    $this->_subscriberFactory->create()->sendNewDealEmail($deal);
-                } 
-                
                 if ($this->getRequest()->getParam('back')) {
                     return $resultRedirect->setPath('*/*/edit', ['deal_id' => $deal->getId(), '_current' => true]);
                 }

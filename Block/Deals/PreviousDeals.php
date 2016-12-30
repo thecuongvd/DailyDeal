@@ -76,7 +76,6 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
             ->setPreviousFilter()
             ->setStoreFilter($storeIds)
             ->setOrder('price', 'ASC');
-//            ->getSelect()->where('quantity-sold > 0');
         return $collection;
     }
 

@@ -18,7 +18,7 @@ class ProductGetFinalPrice implements ObserverInterface {
     public function execute(Observer $observer) {
         $product = $observer->getProduct();
         $deal = $this->_dealFactory->create()->loadByProductId($product->getId());
-        if ($deal->getId() && $deal->isAvailable()) {
+        if ($deal->getId() && $deal->isNotEnded()) {
             $product->setFinalPrice($deal->getPrice());
         }
     }

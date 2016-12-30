@@ -74,6 +74,7 @@ class ComingDeals extends \Magento\Framework\View\Element\Template
         $collection = $this->_dealFactory->create()->getCollection()
             ->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED)
             ->setComingFilter()
+            ->setRemain()
             ->setStoreFilter($storeIds)
             ->setOrder('price', 'ASC');
         return $collection;

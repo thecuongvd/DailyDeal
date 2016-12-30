@@ -99,7 +99,7 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                 $collection->addFieldToFilter('entity_id', ['nin' => $associatedProductIds]);
             }
             $collection->addAttributeToFilter('status', ['in' => $this->_productStatus->getVisibleStatusIds()]);
-//            $collection->addAttributeToFilter('is_deal', ['=' => 1]);
+            $collection->addAttributeToFilter('is_deal', 1);
                 
             //Product In Stock
             $collection->getSelect()->distinct(true)->join(

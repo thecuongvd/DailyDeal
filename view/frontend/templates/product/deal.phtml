@@ -5,49 +5,56 @@ $productId = $block->getRequest()->getParam('id');
 $deal = $block->getDealForProduct($productId);
 if ($deal->getId() && $deal->isAvailable()) {
     $product = $block->getProduct();
-    $dealQuantity = $deal->getQuantity() - $deal->getSold();
-    $productQuantity = $helper->getProductQuantity($product);
-    
-    if ($dealQuantity < $productQuantity) {
-        $leftText = __('For only ' . $dealQuantity . ' item(s)!');
-    } else {
-        $leftText = __('Until Out of Stock');
-    }
-    ?>
-    <div class="product-view-deal">
-        <div class="deal-time-info">
-            <h4 class="dealtime-label"><?php echo __('Time left') ?></h4>
-            <div id="timeleft-product" class="timeleft"> </div>
-            <h5><?php echo $leftText; ?></h5>
-            <script type="text/javascript">
-                require(['jquery', 'dailydeal'], function ($) {
-                    $(document).ready(function () {
-                        var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                        dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
-                        dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft-product');
+    if ($product && $product->getId()) {
+        $remainQuantity = $deal->getQuantity() - $deal->getSold();
+        $productQuantity = $helper->getProductQuantity($product);
+
+        if ($productQuantity <= 0) {
+            $leftText = __('Sorry, this product is sold out!');
+        } else if ($remainQuantity < $productQuantity) {
+            $leftText = __('For only ' . $remainQuantity . ' item(s)!');
+        } else {
+            $leftText = __('Until Out of Stock');
+        }
+
+        $currentTime = $helper->getCurrentTime();
+        $endTime = strtotime($deal->getEndTime());
+        ?>
+        <div class="product-view-deal">
+            <div class="deal-time-info">
+                <h4 class="dealtime-label"><?php echo __('Time left') ?></h4>
+                <div id="timeleft-product" class="timeleft"> </div>
+                <h5><?php echo $leftText; ?></h5>
+                <script type="text/javascript">
+                    require(['jquery', 'dailydeal'], function ($) {
+                        $(document).ready(function () {
+                            var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
+                            dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
+                            dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft-product');
+                        });
                     });
-                });
-            </script>
+                </script>
+            </div>
+            <?php if ($block->getScopeConfig('dailydeal/general/show_share_buttons')) { ?>
+                <table>
+                    <tr class="social-sharing">
+                        <!-- facebook -->
+                        <td class="td-facebook">
+                            <div class="fb-share-button" data-href="<?php echo $product->getProductUrl(); ?>" data-type="button_count"></div>
+                        </td>
+                        <!-- twitter -->
+                        <td>
+                            <a class="twitter-share-button" data-url="<?php echo $product->getProductUrl(); ?>"></a>
+                        </td>
+                        <!-- Google+ -->
+                        <td>
+                            <div class="g-plusone" data-href="<?php echo $product->getProductUrl(); ?>" data-size="medium"></div>
+                        </td>
+                    </tr>
+                </table>
+            <?php } ?>
         </div>
-        <?php if ($block->getScopeConfig('dailydeal/general/show_share_buttons')) { ?>
-            <table>
-                <tr class="social-sharing">
-                    <!-- facebook -->
-                    <td class="td-facebook">
-                        <div class="fb-share-button" data-href="<?php echo $product->getProductUrl(); ?>" data-type="button_count"></div>
-                    </td>
-                    <!-- twitter -->
-                    <td>
-                        <a class="twitter-share-button" data-url="<?php echo $product->getProductUrl(); ?>"></a>
-                    </td>
-                    <!-- Google+ -->
-                    <td>
-                        <div class="g-plusone" data-href="<?php echo $product->getProductUrl(); ?>" data-size="medium"></div>
-                    </td>
-                </tr>
-            </table>
-        <?php } ?>
-    </div>
+    <?php } ?>
 <?php } ?>
 
 <style type="text/css">

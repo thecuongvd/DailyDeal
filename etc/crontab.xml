@@ -3,7 +3,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
     <group id="default">
         <job name="dailydeal_auto_change_status" instance="Magebuzz\Dailydeal\Cron\AutoChangeStatus" method="execute">
-            <schedule>*/30 * * * *</schedule>
+            <schedule>* */2 * * *</schedule>
         </job>
     </group>
 </config>

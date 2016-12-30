@@ -74,9 +74,9 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
         $collection = $this->_dealFactory->create()->getCollection()
             ->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED)
             ->setTodayFilter()
-            ->setStoreFilter($storeIds)
+            ->setRemain()
+            ->setStoreFilter($storeIds) 
             ->setOrder('price', 'ASC');
-//            ->getSelect()->where('quantity-sold > 0');
         return $collection;
     }
 

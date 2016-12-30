@@ -66,6 +66,15 @@ class Deal extends \Magento\Framework\Model\AbstractModel
                 ];
     }
     
+    public function getAvailableProgressStatuses()
+    {
+        return [
+            'running' => __('Running'), 
+            'coming' => __('Coming'), 
+            'ended' => __('Ended')
+                ];
+    }
+    
 //    public function getProduct() {
 //        $product = $this->_productFactory->create()->load($this->getProductId());
 //        if ($product->getId()) {
@@ -128,4 +137,14 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         return false;
     }
 
+    public function isNotEnded() {
+        $nowTime = $this->_dailydealHelper->getCurrentTime() ;
+        $startTime = strtotime($this->getStartTime());
+        $endTime = strtotime($this->getEndTime());
+        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && (($this->getQuantity() - $this->getSold()) > 0) && ($nowTime <= $endTime)) {
+            return true;
+        }
+        return false;
+    }
+    
 }

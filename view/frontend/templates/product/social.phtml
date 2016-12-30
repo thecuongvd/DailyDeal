@@ -3,10 +3,9 @@
 $helper = $block->getHelper();
 $productId = $block->getRequest()->getParam('id');
 $deal = $block->getDealForProduct($productId);
-if ($deal->getId() && $deal->getStatus() == 1) {
+if ($deal->getId() && $deal->isAvailable()) {
     $product = $block->getProduct();
-    $dealQuantity = $deal->getQuantity() - $deal->getSold();
-    if ($product && $product->getId() && $dealQuantity > 0) {
+    if ($product && $product->getId()) {
         $endTime = strtotime($deal->getEndTime());
 
         $messageTemplate = $block->getScopeConfig('dailydeal/general/sharing_template_message');

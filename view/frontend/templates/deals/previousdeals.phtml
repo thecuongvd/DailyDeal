@@ -8,8 +8,7 @@ if ($deals->getSize()) {
     foreach ($deals as $deal) {
         $deal->load($deal->getId());
         $product = $deal->getProduct();
-        $dealQuantity = $deal->getQuantity() - $deal->getSold();
-        if ($product && $product->getId() && $dealQuantity > 0) {
+        if ($product && $product->getId()) {
             if ($i++ % $col == 0) {
                 ?>
                 <ul class="deal-grid">
@@ -21,7 +20,7 @@ if ($deals->getSize()) {
                     <div class="deal-price">
                         <div class="price-box">
                             <p class="old-price">
-                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
                             </p>
                             <p class="special-price">
                                 <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
