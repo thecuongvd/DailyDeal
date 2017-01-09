@@ -4,20 +4,24 @@
  */
 namespace Magebuzz\Dailydeal\Block;
 
-class Sidebar extends \Magento\Framework\View\Element\Template
+class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
 {
-
     protected $_dealFactory;
     protected $_scopeConfig;
     protected $_storeManager;
     protected $_dailydealHelper;
+    protected $urlHelper;
+    protected $_formKey;
 
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context $context,
-        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
+//        \Magento\Framework\View\Element\Template\Context $context,
+        \Magento\Catalog\Block\Product\Context $context,
+        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory, 
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
+        \Magento\Framework\Url\Helper\Data $urlHelper,
+        \Magento\Framework\Data\Form\FormKey $formKey,
         array $data = []
     )
     {
@@ -26,6 +30,8 @@ class Sidebar extends \Magento\Framework\View\Element\Template
         $this->_scopeConfig = $scopeConfig;
         $this->_storeManager = $storeManager;
         $this->_dailydealHelper = $dailydealHelper;
+        $this->urlHelper = $urlHelper;
+        $this->_formKey = $formKey;
     }
 
     public function getIdentities()
@@ -61,7 +67,7 @@ class Sidebar extends \Magento\Framework\View\Element\Template
     {
         $storeIds = [0, $this->getCurrentStoreId()];
         $collection = $this->_dealFactory->create()->getCollection()
-            ->addFieldToFilter('status', 1)
+            ->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED)
             ->setTodayFilter()
             ->setStoreFilter($storeIds)
             ->setOrder('start_time', 'ASC');
@@ -72,6 +78,17 @@ class Sidebar extends \Magento\Framework\View\Element\Template
     {
         return $this->_storeManager->getStore(true)->getId();
 
+    }
+    
+    public function getAddToCartPostParams(\Magento\Catalog\Model\Product $product)
+    {
+        $url = $this->getAddToCartUrl($product);
+        return [
+            'url' => $url,
+            'product' => $product->getEntityId(),
+            \Magento\Framework\App\ActionInterface::PARAM_NAME_URL_ENCODED => $this->urlHelper->getEncodedUrl($url),
+            'formkey' => $this->_formKey->getFormKey()
+        ];
     }
     
 }

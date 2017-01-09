@@ -5,5 +5,8 @@
         <job name="dailydeal_auto_change_status" instance="Magebuzz\Dailydeal\Cron\AutoChangeStatus" method="execute">
             <schedule>* */2 * * *</schedule>
         </job>
+        <job name="dailydeal_send_daily_email" instance="Magebuzz\Dailydeal\Cron\SendDailyEmail" method="execute">
+            <schedule>* 7 * * *</schedule>
+        </job>
     </group>
 </config>

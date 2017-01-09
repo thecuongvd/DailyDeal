@@ -1,6 +1,11 @@
 <?xml version="1.0"?>
  <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!--Plugin-->
+    <type name="Magento\Catalog\Block\Product\ListProduct">
+        <plugin name="magebuzz-dailydeal-block-product-list" 
+                type="Magebuzz\Dailydeal\Plugin\BlockProductList" sortOrder="1"/>
+    </type>
     
     <virtualType name="DailydealGridFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
         <arguments>

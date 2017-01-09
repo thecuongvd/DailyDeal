@@ -9,11 +9,11 @@ use Magento\Framework\View\Result\PageFactory;
 
 class Index extends \Magento\Backend\App\Action
 {
-
     protected $resultPageFactory;
 
     public function __construct(
-        Context $context, PageFactory $resultPageFactory
+        Context $context, 
+        PageFactory $resultPageFactory
     )
     {
         parent::__construct($context);
@@ -27,7 +27,6 @@ class Index extends \Magento\Backend\App\Action
      */
     public function execute()
     {
-        /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magebuzz_Dailydeal::manage_deals');
         $resultPage->addBreadcrumb(__('Dailydeal'), __('Dailydeal'));

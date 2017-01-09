@@ -9,12 +9,11 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
 
-class DealActions extends Column
+class SubscriberActions extends Column
 {
 
     /** Url path */
-    const GRID_URL_PATH_EDIT = 'dailydeal/deal/edit';
-    const GRID_URL_PATH_REPORT = 'dailydeal/deal/report';
+    const GRID_URL_PATH_EDIT = 'dailydeal/subscriber/edit';
 
     protected $urlBuilder;
 
@@ -41,14 +40,10 @@ class DealActions extends Column
         if (isset($dataSource['data']['items'])) {
             foreach ($dataSource['data']['items'] as & $item) {
                 $name = $this->getData('name');
-                if (isset($item['deal_id'])) {
+                if (isset($item['subscriber_id'])) {
                     $item[$name]['edit'] = [
-                        'href' => $this->urlBuilder->getUrl(self::GRID_URL_PATH_EDIT, ['deal_id' => $item['deal_id']]),
+                        'href' => $this->urlBuilder->getUrl(self::GRID_URL_PATH_EDIT, ['subscriber_id' => $item['subscriber_id']]),
                         'label' => __('Edit')
-                    ];
-                    $item[$name]['report'] = [
-                        'href' => $this->urlBuilder->getUrl(self::GRID_URL_PATH_REPORT, ['deal_id' => $item['deal_id']]),
-                        'label' => __('Report')
                     ];
                 }
             }

@@ -3,13 +3,23 @@
  * @copyright Copyright (c) 2016 www.magebuzz.com
  */
 
-namespace Magebuzz\Dailydeal\Block\Adminhtml\Deal\Edit;
+namespace Magebuzz\Dailydeal\Block\Adminhtml\Subscriber\Edit;
 
 /**
  * Adminhtml edit form
  */
 class Form extends \Magento\Backend\Block\Widget\Form\Generic
 {
+    
+    public function __construct(
+        \Magento\Backend\Block\Template\Context $context,
+        \Magento\Framework\Registry $registry,
+        \Magento\Framework\Data\FormFactory $formFactory,
+        array $data = []
+    ) {
+        parent::__construct($context, $registry, $formFactory, $data);
+    }
+    
     /**
      * Init form
      *
@@ -18,8 +28,8 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
     protected function _construct()
     {
         parent::_construct();
-        $this->setId('deal_form');
-        $this->setTitle(__('Deal Information'));
+        $this->setId('subscriber_import_form');
+        $this->setTitle(__('Import subscribers'));
     }
 
     /**
@@ -29,18 +39,17 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
      */
     protected function _prepareForm()
     {
-        /** @var \Magento\Framework\Data\Form $form */
         $form = $this->_formFactory->create(
             [
                 'data' => [
                     'id' => 'edit_form',
                     'class' => 'admin__scope-old',
-                    'action' => $this->getUrl('dailydeal/deal/save'),
-                    'method' => 'post',
-                    'enctype' => 'multipart/form-data'
+                    'action' => $this->getUrl('dailydeal/subscriber/save'),
+                    'method' => 'post'
                 ],
             ]
         );
+        
         $form->setUseContainer(true);
         $this->setForm($form);
         return parent::_prepareForm();

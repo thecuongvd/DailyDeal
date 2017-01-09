@@ -6,11 +6,12 @@
     </head>
     <body>
     	<referenceBlock name="header.links">
-            <block class="Magebuzz\Dailydeal\Block\HeaderLink" name="dailydeal-header-link" template="dailydeal_header_link.phtml" before="-"/>
+            <block class="Magebuzz\Dailydeal\Block\HeaderLink" name="dailydeal-header-link" template="dailydeal_header_link.phtml" 
+                ifconfig="dailydeal/general/enable" before="-"/>
         </referenceBlock>
         <referenceContainer name="sidebar.main">
             <block class="Magebuzz\Dailydeal\Block\Sidebar" name="dailydeal_sidebar" template="dailydeal_sidebar.phtml"
-                ifconfig="dailydeal/general/show_on_sidebar" before="-" />
+                ifconfig="dailydeal/general/enable" before="-" />
         </referenceContainer>
     </body>
 </page>

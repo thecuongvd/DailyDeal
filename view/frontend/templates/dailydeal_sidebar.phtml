@@ -1,9 +1,13 @@
 <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <?php
+
+use Magento\Framework\App\Action\Action;
+
 if ($block->isShowOnSidebar()) {
     $deals = $block->getTodayDealCollection();
     ?>
-    <?php if ($deals->getSize()) { 
+    <?php
+    if ($deals->getSize()) {
         $helper = $block->getHelper();
         ?>
         <div class="block block-todaydeals">
@@ -33,8 +37,8 @@ if ($block->isShowOnSidebar()) {
                                     <div class="deal-price">
                                         <div class="price-box">
                                             <label><?php echo __('Price:') ?> </label>
-                                            <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
-                                            <span class="special-price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
+                                            <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
+                                            <span class="special-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
                                         </div>
                                     </div>
                                     <div class="save-price">
@@ -46,7 +50,7 @@ if ($block->isShowOnSidebar()) {
                                         <span id="timeleft_sidebar_<?php echo $deal->getId() ?>" class="timeleft"> </span>
                                     </div>
                                     <script type="text/javascript">
-                                        require(['jquery', 'dailydeal'], function($) {
+                                        require(['jquery', 'dailydeal'], function ($) {
                                             $(document).ready(function () {
                                                 var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
                                                 dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
@@ -54,7 +58,25 @@ if ($block->isShowOnSidebar()) {
                                             });
                                         });
                                     </script>
-                                    <p><button type="button" title="<?php echo __('Add to Cart') ?>" class="action primary btn-cart" onclick="setLocation('<?php echo $block->getAddToCartUrl($product) ?>')"><span><span><?php echo __('Add to Cart') ?></span></span></button></p>
+                                    <?php 
+                                    if ($product->isSaleable()) { 
+                                        $addToCartParams = $block->getAddToCartPostParams($product);
+                                        ?>
+                                        <div class="actions-primary">
+                                            <form data-role="tocart-form" 
+                                                  action="<?php echo $addToCartParams['url']; ?>" 
+                                                  method="post">
+                                                <input type="hidden" name="product" value="<?php echo $addToCartParams['product']; ?>">
+                                                <input type="hidden" name="<?php echo Action::PARAM_NAME_URL_ENCODED; ?>" 
+                                                       value="<?php echo $addToCartParams[Action::PARAM_NAME_URL_ENCODED]; ?>">
+                                                <input name="form_key" type="hidden" value="<?php echo $addToCartParams['formkey']; ?>">                                            
+                                                <button type="submit" title="<?php echo __('Add to Cart'); ?>" class="action tocart primary">
+                                                    <span><?php echo __('Add to Cart'); ?></span>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    <?php } ?>
+
                                 </td>
                             </tr>
                             <?php
@@ -62,7 +84,6 @@ if ($block->isShowOnSidebar()) {
                     }
                     ?>
                 </table>
-                <!--<script type="text/javascript"> decorateTable('sidebar-deal-list');</script>-->
             </div>
         </div>
         <?php

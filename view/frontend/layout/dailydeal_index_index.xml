@@ -7,7 +7,8 @@
     </head>
     <body>
         <referenceContainer name="content">
-            <block class="Magebuzz\Dailydeal\Block\Dailydeal" name="dailydeal_deal" template="dailydeal.phtml" ifconfig="dailydeal/general/enable" cacheable="false" >
+            <block class="Magebuzz\Dailydeal\Block\Dailydeal" name="dailydeal_deal" template="dailydeal.phtml" 
+                   ifconfig="dailydeal/general/enable" cacheable="false" >
                 <block class="Magebuzz\Dailydeal\Block\Deals\TodayDeals" name="dailydeal_today_deal" template="deals/todaydeals.phtml" />
                 <block class="Magebuzz\Dailydeal\Block\Deals\ComingDeals" name="dailydeal_coming_deal" template="deals/comingdeals.phtml" 
                        ifconfig="dailydeal/general/show_coming_deals" cacheable="false" />

@@ -59,15 +59,18 @@
                     <label>Allow customer to subscribe to receive new daily deal notification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-                <field id="email_sender" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+<!--                <field id="email_sender" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email sender</label>
                     <source_model>Magebuzz\Dailydeal\Model\Config\Source\EmailSender</source_model>
-                </field>
-                <field id="email_template" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Email Template for email list</label>
+                </field>-->
+                <field id="confirm_email_template" translate="label" type="hidden" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
                 </field>
-                <field id="intro_message" translate="label" type="textarea" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="email_template" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Daily Email Template</label>
+                    <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                </field>
+                <field id="intro_message" translate="label" type="textarea" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Intro message</label>
                     <comment><![CDATA[The message which show in popup to customer enter email]]></comment>
                 </field>

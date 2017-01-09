@@ -10,7 +10,7 @@ class AutoChangeStatus
      *
      * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
-    protected $_date;
+    private $_date;
 
     /**
      * @var \Magebuzz\Dailydeal\Model\DealFactory
@@ -20,7 +20,7 @@ class AutoChangeStatus
     /**
      * @var LoggerInterface
      */
-    protected $logger;
+    private $logger;
 
     /**
      * @param \Magento\Framework\Stdlib\DateTime\DateTime

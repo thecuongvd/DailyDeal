@@ -29,7 +29,9 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     protected $_stockItem;
     protected $_date;
     protected $_dailydealHelper;
+    protected $urlModel;
     protected $_formKey;
+    protected $_orderItemCollectionFactory;
 
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -39,7 +41,9 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         \Magento\CatalogInventory\Api\StockStateInterface $stockItem,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
+        \Magento\Framework\UrlFactory $urlFactory,
         \Magento\Framework\Data\Form\FormKey $formKey,
+        \Magento\Sales\Model\ResourceModel\Order\Item\CollectionFactory $orderItemCollectionFactory,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = [])
@@ -49,7 +53,9 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         $this->stockItem = $stockItem;
         $this->_date = $date;
         $this->_dailydealHelper = $dailydealHelper;
+        $this->urlModel = $urlFactory->create();
         $this->_formKey = $formKey;
+        $this->_orderItemCollectionFactory = $orderItemCollectionFactory;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -114,12 +120,12 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     public function calSaving() {
         $isRoundSaving = $this->getScopeConfig('dailydeal/general/is_round_saving');
         $product = $this->getProduct();
-        if ($product && $product->getFinalPrice() > 0) {
-            $decrease = floatval($product->getFinalPrice()) - floatval($this->getPrice());
+        if ($product && $product->getPrice() > 0) {
+            $decrease = floatval($product->getPrice()) - floatval($this->getPrice());
             if ($isRoundSaving) {
-                $saving = round(100 * $decrease / floatval($product->getFinalPrice()), 0);
+                $saving = round(100 * $decrease / floatval($product->getPrice()), 0);
             } else {
-                $saving = round(100 * $decrease / floatval($product->getFinalPrice()), 2);
+                $saving = round(100 * $decrease / floatval($product->getPrice()), 2);
             }
         } else {
             $saving = 0;
@@ -147,4 +153,9 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         return false;
     }
     
+    public function getOrderItemCollection()
+    {
+        return $this->_orderItemCollectionFactory->create()->addFieldToFilter('product_id', $this->getProductId());
+    }
+
 }

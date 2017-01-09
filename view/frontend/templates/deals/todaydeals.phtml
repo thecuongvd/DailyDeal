@@ -39,7 +39,7 @@ if ($deals->getSize()) {
                                 <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
                             </p>
                             <p class="special-price">
-                                <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
+                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
                             </p>
                         </div>
                     </div>

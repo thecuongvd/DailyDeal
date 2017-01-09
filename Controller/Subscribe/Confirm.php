@@ -27,7 +27,7 @@ class Confirm extends Action
             $confirmCode = $this->getRequest()->getParam('confirm_code');
             $subscriber = $this->_subscriberFactory->create()->load($subscriberId);
             if ($subscriber->getId() && $subscriber->getConfirmCode() == $confirmCode) {
-                $subscriber->setStatus(1)->save();
+                $subscriber->setStatus(\Magebuzz\Dailydeal\Model\Subscriber::STATUS_ENABLED)->save();
                 $this->messageManager->addSuccess(__('You have confirmed subscription successfully!'));
             } else {
                 $this->messageManager->addError(__('There was a problem when confirm subscription!'));

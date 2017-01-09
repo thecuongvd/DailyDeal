@@ -9,26 +9,14 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 
 class Save extends \Magento\Backend\App\Action
 {
-    protected $_fileSystem;
-    protected $_fileUploaderFactory;
-    protected $_logger;
-    protected $jsHelper;
     protected $_date;
 
     public function __construct(
         Action\Context $context,
-        \Magento\Framework\Filesystem $fileSystem,
-        \Magento\MediaStorage\Model\File\UploaderFactory $fileUploaderFactory,
-        \Psr\Log\LoggerInterface $logger,
-        \Magento\Backend\Helper\Js $jsHelper,
         \Magento\Framework\Stdlib\DateTime\DateTime $date
     )
     {
         parent::__construct($context);
-        $this->_fileSystem = $fileSystem;
-        $this->_fileUploaderFactory = $fileUploaderFactory;
-        $this->_logger = $logger;
-        $this->jsHelper = $jsHelper;
         $this->_date = $date;
     }
 

@@ -14,7 +14,7 @@ class Index extends Action
         \Magento\Framework\App\Action\Context $context,
         \Magento\Framework\View\Result\PageFactory $resultPageFactory
     )
-    {
+    { 
         $this->resultPageFactory = $resultPageFactory;
         parent::__construct($context);
     }

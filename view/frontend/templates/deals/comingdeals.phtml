@@ -46,13 +46,13 @@ if ($deals->getSize()) {
                         </div>
                     </div>
                     <h4><?php echo $leftText; ?></h4>
-                    <span id="timeleft_today_<?php echo $deal->getId() ?>" class="timeleft"> </span>
+                    <span id="timeleft_coming_<?php echo $deal->getId() ?>" class="timeleft"> </span>
                     <script type="text/javascript">
                         require(['jquery', 'dailydeal'], function ($) {
                             $(document).ready(function () {
                                 var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
                                 dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
-                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft_today_<?php echo $deal->getId() ?>');
+                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft_coming_<?php echo $deal->getId() ?>');
                             });
                         });
                     </script>
