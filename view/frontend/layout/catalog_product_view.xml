@@ -7,10 +7,11 @@
     <body>
         <referenceContainer name="product.info.form.content">
             <block class="Magebuzz\Dailydeal\Block\Product\Deal" name="dailydeal.product.social"
-                   template="product/social.phtml" before="product.info.addtocart" 
-                   ifconfig="dailydeal/general/enable" cacheable="false" />
+                   ifconfig="dailydeal/general/enable" cacheable="false" _isScopePrivate="true"
+                   template="product/social.phtml" before="product.info.addtocart" />
             <block class="Magebuzz\Dailydeal\Block\Product\Deal" name="dailydeal.product.deal"
-                   ifconfig="dailydeal/general/enable" template="product/deal.phtml" after="dailydeal.product.social" cacheable="false" />
+                   ifconfig="dailydeal/general/enable" cacheable="false" _isScopePrivate="true" 
+                   template="product/deal.phtml" after="dailydeal.product.social" />
         </referenceContainer>
     </body>
 </page>

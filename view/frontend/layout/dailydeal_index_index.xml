@@ -8,12 +8,12 @@
     <body>
         <referenceContainer name="content">
             <block class="Magebuzz\Dailydeal\Block\Dailydeal" name="dailydeal_deal" template="dailydeal.phtml" 
-                   ifconfig="dailydeal/general/enable" cacheable="false" >
+                   ifconfig="dailydeal/general/enable" cacheable="false" _isScopePrivate="true" >
                 <block class="Magebuzz\Dailydeal\Block\Deals\TodayDeals" name="dailydeal_today_deal" template="deals/todaydeals.phtml" />
                 <block class="Magebuzz\Dailydeal\Block\Deals\ComingDeals" name="dailydeal_coming_deal" template="deals/comingdeals.phtml" 
-                       ifconfig="dailydeal/general/show_coming_deals" cacheable="false" />
+                    ifconfig="dailydeal/general/show_coming_deals" />
                 <block class="Magebuzz\Dailydeal\Block\Deals\PreviousDeals" name="dailydeal_previous_deal" template="deals/previousdeals.phtml" 
-                       ifconfig="dailydeal/general/show_previous_deals" cacheable="false" />
+                    ifconfig="dailydeal/general/show_previous_deals" />
             </block>
         </referenceContainer>
     </body>

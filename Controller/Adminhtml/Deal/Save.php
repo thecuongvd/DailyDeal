@@ -36,7 +36,7 @@ class Save extends \Magento\Backend\App\Action
             if ($id) {
                 $deal->load($id);
                 if ($id != $deal->getId()) {
-                    throw new \Magento\Framework\Exception\LocalizedException(__('The wrong deal is specified.'));
+                    throw new \Magento\Framework\Exception\LocalizedException(__('The wrong deal is specified'));
                 }
             }
 
@@ -44,7 +44,7 @@ class Save extends \Magento\Backend\App\Action
             $startTime = strtotime($data['start_time']);
             $endTime = strtotime($data['end_time']);
             if ($startTime >= $endTime) {
-                $this->messageManager->addError(__('Start Time must be earlier than End Time.'));
+                $this->messageManager->addError(__('Start Time must be earlier than End Time'));
                 $this->_getSession()->setFormData($data);
                 if ($id) {
                     return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
@@ -55,20 +55,7 @@ class Save extends \Magento\Backend\App\Action
             
             //Check if add new and product is selected
             if (!$id && empty($data['product_id'])) {
-                $this->messageManager->addError(__('You must select a product before saving.'));
-                $this->_getSession()->setFormData($data);
-                if ($id) {
-                    return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
-                } else {
-                    return $resultRedirect->setPath('*/*/new', ['_current' => true]);
-                }
-            }
-            
-            //Check if quantity of deal is greater than quantity of product
-            $prdQty = $data['prd_qty'];
-            $dealQty = $data['quantity'];
-            if ($dealQty > $prdQty) {
-                $this->messageManager->addError(__('Quantity of deal must not greater than quantity of product.'));
+                $this->messageManager->addError(__('You must select a product before saving'));
                 $this->_getSession()->setFormData($data);
                 if ($id) {
                     return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
@@ -78,6 +65,8 @@ class Save extends \Magento\Backend\App\Action
             }
 
             //Process time
+            $localStartTime = $data['start_time'];
+            $localEndTime = $data['end_time'];
             $localeDate = $this->_objectManager->get('Magento\Framework\Stdlib\DateTime\TimezoneInterface');
             $data['start_time'] = $localeDate->date($data['start_time'])->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
             $data['end_time'] = $localeDate->date($data['end_time'])->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
@@ -104,7 +93,16 @@ class Save extends \Magento\Backend\App\Action
 
             try {
                 $deal->save();
-                $this->messageManager->addSuccess(__('You saved this Deal.'));
+                //Save Special Price for Product
+                $product = $deal->load($deal->getId())->getProduct();
+                $product->setSpecialPrice($data['price']);
+                $product->setSpecialFromDate($localStartTime);
+                $product->setSpecialFromDateIsFormated(true);
+                $product->setSpecialToDate($localEndTime);
+                $product->setSpecialToDateIsFormated(true);
+                $product->save();
+                
+                $this->messageManager->addSuccess(__('You saved this Deal'));
                 $this->_objectManager->get('Magento\Backend\Model\Session')->setFormData(false);
                 if ($this->getRequest()->getParam('back')) {
                     return $resultRedirect->setPath('*/*/edit', ['deal_id' => $deal->getId(), '_current' => true]);
@@ -115,7 +113,7 @@ class Save extends \Magento\Backend\App\Action
             } catch (\RuntimeException $e) {
                 $this->messageManager->addError($e->getMessage());
             } catch (\Exception $e) {
-                $this->messageManager->addException($e, __('Something went wrong while saving the deal.'));
+                $this->messageManager->addException($e, __('Something went wrong while saving the deal'));
             }
 
             $this->_getSession()->setFormData($data);

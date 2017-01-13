@@ -1,31 +1,29 @@
 <div class="grid-deals">
-    <div class="page-title title-buttons">
-        <?php if ($block->getScopeConfig('dailydeal/subscription/allow_subscribe')) { ?>
-            <div class="daily-deal-subscription">
-                <a class="fancybox" href="#subscription-popup" title="" id="get_notified_daily_deal" >
-                    <strong><?php echo __("Get notified of daily deals"); ?></strong>
-                </a>
-            </div>
-        <?php } ?>
-    </div>
+    <?php if ($block->getScopeConfig('dailydeal/subscription/allow_subscribe')) { ?>
+        <div class="daily-deal-subscription">
+            <a class="fancybox" href="#subscription-popup" title="" id="get_notified_daily_deal" >
+                <strong><?php echo __("Get notified of daily deals"); ?></strong>
+            </a>
+        </div>
+    <?php } ?>
     <div class="all-deals">
         <div id="today-deals">
-            <h3><?php echo __('Today\'s Deals') ?></h3>
+            <h3 class="deal-label"><?php echo __('Today Deals') ?></h3>
             <div class="list-deals">
                 <?php echo $block->getChildHtml('dailydeal_today_deal'); ?>
             </div>
         </div>
         <?php if ($block->getScopeConfig('dailydeal/general/show_coming_deals')) { ?>
             <div id="coming-deals">
-                <h3><?php echo __('Coming Deals') ?></h3>
+                <h3 class="deal-label"><?php echo __('Coming Deals') ?></h3>
                 <div class="list-deals">
                     <?php echo $block->getChildHtml('dailydeal_coming_deal'); ?>
                 </div>
             </div>
         <?php } ?>
-        <?php if ($block->getScopeConfig('dailydeal/general/show_coming_deals')) { ?>
+        <?php if ($block->getScopeConfig('dailydeal/general/show_previous_deals')) { ?>
             <div id="previous-deals">
-                <h3><?php echo __('Previous Deals') ?></h3>
+                <h3 class="deal-label"><?php echo __('Previous Deals') ?></h3>
                 <div class="list-deals">
                     <?php echo $block->getChildHtml('dailydeal_previous_deal'); ?>
                 </div>

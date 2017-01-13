@@ -46,7 +46,7 @@ class Report extends \Magento\Backend\App\Action
         $resultPage->addBreadcrumb(__('Dailydeal'), __('Dailydeal'));
         $resultPage->addBreadcrumb(__('Manage Deals'), __('Manage Deals'));
         $resultPage->addBreadcrumb(__('Report Deal'), __('Report Deal'));
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Daily Deals'));
         $resultPage->getConfig()->getTitle()->prepend( __('Report Deal ') . $deal->getTitle());
 
         return $resultPage;

@@ -54,7 +54,7 @@ class Edit extends \Magento\Backend\App\Action
         $resultPage->addBreadcrumb(
             $id ? __('Edit Subscriber') : __('New Subscriber'), $id ? __('Edit Subscriber') : __('New Subscriber')
         );
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Daily Deals'));
         $resultPage->getConfig()->getTitle()
             ->prepend($subscriber->getId() ? __('Edit Subscriber ') : __('New Subscriber'));
 
@@ -72,7 +72,7 @@ class Edit extends \Magento\Backend\App\Action
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magebuzz_Dailydeal::manage_subscribers')
-            ->addBreadcrumb(__('Dailydeal'), __('Dailydeal'))
+            ->addBreadcrumb(__('Daily Deals'), __('Daily Deals'))
             ->addBreadcrumb(__('Manage Subscribers'), __('Manage Subscribers'));
         return $resultPage;
     }

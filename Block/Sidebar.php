@@ -12,9 +12,10 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
     protected $_dailydealHelper;
     protected $urlHelper;
     protected $_formKey;
+    
+    protected $_deals;
 
     public function __construct(
-//        \Magento\Framework\View\Element\Template\Context $context,
         \Magento\Catalog\Block\Product\Context $context,
         \Magebuzz\Dailydeal\Model\DealFactory $dealFactory, 
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
@@ -32,6 +33,7 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
         $this->_dailydealHelper = $dailydealHelper;
         $this->urlHelper = $urlHelper;
         $this->_formKey = $formKey;
+        $this->_deals = $this->getTodayDealCollection();
     }
 
     public function getIdentities()
@@ -39,23 +41,35 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
         return [\Magebuzz\Dailydeal\Model\Deal::CACHE_TAG . '_' . 'sidebar'];
     }
     
-    public function getHelper() {
-        return $this->_dailydealHelper;
-    }
-
-    public function isShowOnSidebar()
+    protected function _prepareLayout()
     {
-        if ($this->getScopeConfig('dailydeal/general/show_on_sidebar')) {
-            return true;
-        } 
-        return false;
+        parent::_prepareLayout();
+        if ($this->_deals) {
+            $limit = $this->getLimit();
+            $pager = $this->getLayout()->createBlock('Magento\Theme\Block\Html\Pager', 'dailydeal.sidebardeals.pager')
+                ->setLimit($limit)
+                ->setCollection($this->_deals);
+            $this->setChild('pager', $pager);
+            $this->_deals->load();
+        }
+        return $this;
     }
     
-    public function isRoundSaving() {
-        if ($this->getScopeConfig('dailydeal/general/is_round_saving')) {
-            return true;
-        } 
-        return false;
+    public function getLimit() {
+        $limit = (int) $this->getScopeConfig('dailydeal/general/num_of_sidebar_deals');
+        if (empty($limit)) {
+            $limit = 6;
+        }
+        return $limit;
+    }
+    
+    public function getPagedDeals()
+    {
+        return $this->_deals;
+    }
+    
+    public function getHelper() {
+        return $this->_dailydealHelper;
     }
 
     public function getScopeConfig($path)

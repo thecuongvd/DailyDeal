@@ -30,9 +30,9 @@ class Index extends \Magento\Backend\App\Action
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magebuzz_Dailydeal::manage_subscribers');
-        $resultPage->addBreadcrumb(__('Dailydeal'), __('Dailydeal'));
-        $resultPage->addBreadcrumb(__('Manage Deals'), __('Manage Subscribers'));
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->addBreadcrumb(__('Daily Deals'), __('Daily Deals'));
+        $resultPage->addBreadcrumb(__('Manage Subscribers'), __('Manage Subscribers'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Manage Subscribers'));
 
         return $resultPage;
     }

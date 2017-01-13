@@ -3,12 +3,13 @@
 
 use Magento\Framework\App\Action\Action;
 
-if ($block->isShowOnSidebar()) {
-    $deals = $block->getTodayDealCollection();
+if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
+    $deals = $block->getPagedDeals();
     ?>
     <?php
     if ($deals->getSize()) {
         $helper = $block->getHelper();
+        $limit = $block->getLimit();
         ?>
         <div class="block block-todaydeals">
             <div class="block-title"><h3><?php echo __('Today Deals'); ?></h3></div>
@@ -19,7 +20,6 @@ if ($block->isShowOnSidebar()) {
                         $deal->load($deal->getId());
                         $product = $deal->getProduct();
                         if ($product && $product->getId() && $deal->getProductQty() > 0) {
-                            $currentTime = $helper->getCurrentTime();
                             $endTime = strtotime($deal->getEndTime());
                             ?>
                             <tr>
@@ -42,24 +42,24 @@ if ($block->isShowOnSidebar()) {
                                         </div>
                                     </div>
                                     <div class="save-price">
-                                        <label><?php echo __('Save:') ?> </label>
+                                        <label><?php echo __('Saving:') ?> </label>
                                         <span class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></span>
                                     </div>
                                     <div class="timeleft-block">
                                         <label><?php echo __('DEAL TIME') ?></label>
-                                        <span id="timeleft_sidebar_<?php echo $deal->getId() ?>" class="timeleft"> </span>
+                                        <span id="timeleft_sidebar_<?php echo $deal->getId() ?>" class="timeleft" data-totime="<?php echo $endTime ?>"> </span>
                                     </div>
                                     <script type="text/javascript">
                                         require(['jquery', 'dailydeal'], function ($) {
                                             $(document).ready(function () {
                                                 var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.init('<?php echo $currentTime ?>', '<?php echo $endTime ?>', '<?php echo $deal->getId() ?>');
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('timeleft_sidebar_<?php echo $deal->getId() ?>');
+                                                dTimeCounter_<?php echo $deal->getId(); ?>.init('#timeleft_sidebar_<?php echo $deal->getId() ?>');
+                                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('#timeleft_sidebar_<?php echo $deal->getId() ?>');
                                             });
                                         });
                                     </script>
-                                    <?php 
-                                    if ($product->isSaleable()) { 
+                                    <?php
+                                    if ($product->isSaleable()) {
                                         $addToCartParams = $block->getAddToCartPostParams($product);
                                         ?>
                                         <div class="actions-primary">
@@ -81,6 +81,24 @@ if ($block->isShowOnSidebar()) {
                             </tr>
                             <?php
                         }
+                    }
+                    ?>
+                    <tr>
+                        <td style="border-bottom:none;"><?php echo __('There are ' . $deals->getSize() . ' deal(s) today'); ?></td>
+                    </tr>
+                    <?php
+                    if ($deals->getSize() > $limit) {
+                        ?>
+                        <tr>
+                            <td>
+                                <div class="see-all">
+                                    <a href='<?php echo $block->getUrl('dailydeal/index/today'); ?>'>
+                                        <?php echo __('See all today deals ...'); ?>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php
                     }
                     ?>
                 </table>

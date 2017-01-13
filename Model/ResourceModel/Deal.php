@@ -90,6 +90,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         $condition = ['deal_id = ?' => $object->getId()];
         $connection->delete($this->_dealStoreTable, $condition);
         
+        //Save Deal Store
         $stores = $object->getStores();
         if (!empty($stores)) {
             $insertedStoreIds = [];
@@ -103,6 +104,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
                 $connection->insert($this->_dealStoreTable, $storeInsert);
             }
         }
+        
         return $this;
     }
     

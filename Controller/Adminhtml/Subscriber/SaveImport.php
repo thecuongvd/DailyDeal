@@ -73,7 +73,7 @@ class SaveImport extends \Magento\Backend\App\Action {
                     $flag = true;
                     $i++;
                 }
-            } catch (Exception $e) {
+            } catch (\Exception $e) {
                 $this->messageManager->addError($e->getMessage());
                 return $resultRedirect->setPath('*/*/');
             }

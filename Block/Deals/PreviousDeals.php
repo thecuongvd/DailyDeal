@@ -40,8 +40,9 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
     {
         parent::_prepareLayout();
         if ($this->_deals) {
+            $limit = $this->getLimit();
             $pager = $this->getLayout()->createBlock('Magento\Theme\Block\Html\Pager', 'dailydeal.previousdeals.pager')
-                ->setAvailableLimit([9 => 9, 15 => 15, 30 => 30, 'all' => 'All'])
+                ->setLimit($limit)
                 ->setCollection($this->_deals);
             $this->setChild('pager', $pager);
             $this->_deals->load();
@@ -49,9 +50,12 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
         return $this;
     }
     
-    public function getPagerHtml()
-    {
-        return $this->getChildHtml('pager');
+    public function getLimit() {
+        $limit = (int) $this->getScopeConfig('dailydeal/general/deal_per_page');
+        if (empty($limit)) {
+            $limit = 9;
+        }
+        return $limit;
     }
     
     public function getPagedDeals()

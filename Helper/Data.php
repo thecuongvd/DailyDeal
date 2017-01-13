@@ -16,6 +16,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_CONFIRM_EMAIL = 'dailydeal/subscription/confirm_email_template';
     const XML_PATH_DAILY_NOTIFY_EMAIL = 'dailydeal/subscription/email_template';
     
+    const CACHE_TODAY_DEALS_PRODUCT_IDS = 'MB_CACHE_TODAY_DEALS_PRODUCT_IDS';
+
+    protected $_localDeals = [];
     protected $_scopeConfig;
     protected $_storeManager;
     protected $_currency;
@@ -101,7 +104,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
     
     public function getCurrentTime() {
-        return $this->_date->gmtTimestamp();
+        return $this->_date->gmtTimestamp() + $this->_date->getGmtOffset();
     }
     
     public function getCurrentUrl() {
@@ -117,12 +120,9 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     public function getProductImageUrl($product, $size) {
-        if ($size == 'large') {
-            $imageSize = 'product_page_image_large';
-        } else if ($size == 'medium') {
-            $imageSize = 'product_page_image_medium';
-        } else {
-            $imageSize = 'product_page_image_small';
+        $imageSize = 'product_page_image_' . $size;
+        if ($size == 'category') {
+            $imageSize = 'category_page_list';
         }
         $imageUrl = $this->prdImageHelper->init($product, $imageSize)
             ->keepAspectRatio(TRUE)
@@ -131,8 +131,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $imageUrl;
     }
 
-    public function sendSubscriptionEmail($subscriberData)
-    {
+    public function sendSubscriptionEmail($subscriberData) {
         $confirmLink = $this->urlModel->getUrl('dailydeal/subscribe/confirm', ['subscriber_id' => $subscriberData['subscriber_id'], 'confirm_code' => $subscriberData['confirm_code']]);
         $vars = [];
         $vars['customer_name'] = $subscriberData['customer_name'];
@@ -147,8 +146,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     $storeId))
                 ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $storeId])
                 ->setTemplateVars($vars)
-                ->setFrom(['email' => '', 'name' => 'Daily Deals'])
-                ->addTo($subscriberData['email'])
+                ->setFrom(['email' => '', 'name' => 'Customer Support'])
+                ->addTo($subscriberData['email'], $subscriberData['customer_name'])
                 ->getTransport();
 
             $transport->sendMessage();
@@ -180,8 +179,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                             $storeId))
                         ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $storeId])
                         ->setTemplateVars($vars)
-                        ->setFrom(['email' => '', 'name' => 'Daily Deals'])
-                        ->addTo($email)
+                        ->setFrom(['email' => '', 'name' => 'Customer Support'])
+                        ->addTo($email, $customerName)
                         ->getTransport();
 
                     $transport->sendMessage();

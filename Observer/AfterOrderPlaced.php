@@ -5,7 +5,7 @@ namespace Magebuzz\Dailydeal\Observer;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
-class AfterOrderPlacedSetDealQty implements ObserverInterface {
+class AfterOrderPlaced implements ObserverInterface {
 
     protected $_dealFactory;
     protected $_scopeConfig;
@@ -22,17 +22,18 @@ class AfterOrderPlacedSetDealQty implements ObserverInterface {
     }
 
     public function execute(Observer $observer) {
-        if ($this->getScopeConfig('dailydeal/general/enable')) {
-            $orderModel = $observer->getOrder();
-            $items = $orderModel->getItemsCollection();
-            foreach ($items as $item) {
+
+        $orderModel = $observer->getOrder();
+        $items = $orderModel->getItemsCollection();
+        foreach ($items as $item) {
+            if ($this->getScopeConfig('dailydeal/general/enable')) {
                 $deal = $this->_dealFactory->create()->loadByProductId($item->getProductId());
                 if ($deal->getId() && $deal->isAvailable()) {
                     $deal->setSold((int) $deal->getSold() + 1);
 
                     try {
                         $deal->save();
-                    } catch (Exception $e) {
+                    } catch (\Exception $e) {
                         $this->logger->critical($e);
                     }
                 }

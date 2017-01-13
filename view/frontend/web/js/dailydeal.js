@@ -1,8 +1,11 @@
+/**
+ * @copyright Copyright (c) 2016 www.magebuzz.com
+ */
+
 function DealTimeCounter() {
-    this.init = function (now_time, end_time, deal_id) {
-        this.now_time = parseInt(now_time) * 1000;
+    this.init = function (end_time) {
+        this.now_time = (new Date()).getTime();
         this.end_time = parseInt(end_time) * 1000;
-        this.deal_id = deal_id;
         this.end = new Date(this.end_time);
         var endDate = this.end;
         this.second = endDate.getSeconds();
@@ -118,138 +121,17 @@ function DealTimeCounter() {
         }
 
         this.now_time = this.now_time + 1000; //increase 1000 miliseconds
-
-        timerID = setTimeout("setDealTimeleft(" + (this.now_time / 1000) + "," + (this.end_time / 1000) + ",'" + timeleft_id + "','" + this.deal_id + "');", 1000);
+        var nowTimeSecond = this.now_time / 1000;
+        var endTimeSecond = this.end_time / 1000;
+        timerID = setTimeout(function(){setDealTimeleft(endTimeSecond,timeleft_id);}, 1000);
     }
     
     return this;
 }
 
-
-
-function setDealTimeleft(now_time, end_time, timeleft_id, deal_id)
+function setDealTimeleft(end_time, timeleft_id)
 {
     var counter = new DealTimeCounter();
-    counter.init(now_time, end_time, deal_id);
+    counter.init(end_time);
     counter.setTimeleft(timeleft_id);
-}
-
-function myPopupRelocate(element_id) {
-    var scrolledX, scrolledY;
-    if (self.pageYOffset) {
-        scrolledX = self.pageXOffset;
-        scrolledY = self.pageYOffset;
-    } else if (document.documentElement && document.documentElement.scrollTop) {
-        scrolledX = document.documentElement.scrollLeft;
-        scrolledY = document.documentElement.scrollTop;
-    } else if (document.body) {
-        scrolledX = document.body.scrollLeft;
-        scrolledY = document.body.scrollTop;
-    }
-
-    var centerX, centerY;
-    if (self.innerHeight) {
-        centerX = self.innerWidth;
-        centerY = self.innerHeight;
-    } else if (document.documentElement && document.documentElement.clientHeight) {
-        centerX = document.documentElement.clientWidth;
-        centerY = document.documentElement.clientHeight;
-    } else if (document.body) {
-        centerX = document.body.clientWidth;
-        centerY = document.body.clientHeight;
-    }
-
-    var leftOffset = scrolledX + (centerX - 250) / 2;
-    var topOffset = scrolledY + (centerY - 200) / 2;
-
-    document.getElementById(element_id).style.top = topOffset + "px";
-    document.getElementById(element_id).style.left = leftOffset + "px";
-}
-
-function fireMyPopup(element_id) {
-    myPopupRelocate(element_id);
-    document.getElementById(element_id).style.display = "block";
-    document.body.onscroll = myPopupRelocate(element_id);
-    window.onscroll = myPopupRelocate(element_id);
-}
-
-function close_popup(element) {
-    $('subscribe-result-message').update('');
-    $('dailydeal-subscription-form').show();
-    $('dailydeal_email').value = '';
-    $(element).hide();
-}
-
-function close_popup_message(element) {
-    $(element).hide();
-}
-
-function submit_dailydeal_newsletter(newsletter_url) {
-    var parameters = {
-        email_address: $('dailydeal_email').value,
-        customer_name: $('dailydeal_customer_name').value
-    };
-    show_loading(true);
-    var request = new Ajax.Request(
-            newsletter_url,
-            {
-                method: 'post',
-                onSuccess: function (transport) {
-                    var data = transport.responseText.evalJSON();
-                    if (data.error) {
-                        show_loading(false);
-                        $('subscribe-result-message').update(data.message);
-                    } else {
-                        show_loading(false);
-                        $('subscribe-result-message').update(data.message);
-                    }
-                },
-                parameters: parameters
-            }
-    );
-}
-
-function show_loading(is_show) {
-    if (is_show) {
-        $('dailydeal-subscription-form').hide();
-        $('subscribe-form-ajax').show();
-    } else {
-        //$('dailydeal-subscription-form').show();
-        $('subscribe-form-ajax').hide();
-    }
-}
-
-//var Deal = Class.create();
-//Deal.prototype = {
-//    initialize: function (changeProductUrl) {
-//
-//        this.changeProductUrl = changeProductUrl;
-//
-//    },
-//    changeProduct: function (product_id)
-//    {
-//        var url = this.changeProductUrl;
-//
-//        url += 'product_id/' + product_id;
-//        new Ajax.Updater(
-//                'product_name_contain',
-//                url,
-//                {
-//                    method: 'get',
-//                    onComplete: function () {
-//                        $('product_name').value = $('newproduct_name').value;
-//                        $('product_price').value = $('newproduct_price').value;
-//                        $('product_quantity').value = $('newproduct_quantity').value;
-//                    },
-//                    onFailure: ''
-//                }
-//        );
-//
-//    }
-//}
-
-function updateProductName()
-{
-    alert('hehe');
-    $('product_name').value = $('newproduct_name').value;
 }

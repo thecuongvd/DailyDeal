@@ -54,7 +54,7 @@ class Edit extends \Magento\Backend\App\Action
         $resultPage->addBreadcrumb(
             $id ? __('Edit Deal') : __('New Deal'), $id ? __('Edit Deal') : __('New Deal')
         );
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Daily Deals'));
         $resultPage->getConfig()->getTitle()
             ->prepend($deal->getId() ? __('Edit Deal ') . $deal->getTitle() : __('New Deal'));
 
@@ -72,7 +72,7 @@ class Edit extends \Magento\Backend\App\Action
         /** @var \Magento\Backend\Model\View\Result\Page $resultPage */
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magebuzz_Dailydeal::manage_deals')
-            ->addBreadcrumb(__('Dailydeal'), __('Dailydeal'))
+            ->addBreadcrumb(__('Daily Deals'), __('Daily Deals'))
             ->addBreadcrumb(__('Manage Deals'), __('Manage Deals'));
         return $resultPage;
     }

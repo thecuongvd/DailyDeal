@@ -11,7 +11,7 @@ if ($block->getScopeConfig('dailydeal/general/show_share_buttons')) {
 
             $messageTemplate = $block->getScopeConfig('dailydeal/general/sharing_template_message');
             if (!$messageTemplate) {
-                $messageTemplate = 'Hurry Up! %s are on SALE before %s GMT on %s';
+                $messageTemplate = __('Hurry Up! %s are on SALE before %s GMT on %s');
             }
             $message = sprintf($messageTemplate, $product->getName(), date('H:i:s', $endTime), date('d D-M-Y', $endTime));
             ?>

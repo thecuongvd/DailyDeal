@@ -22,7 +22,7 @@ class Import extends \Magento\Backend\App\Action
     {
         $resultPage = $this->_initAction();
         $resultPage->addBreadcrumb(__('Import Subscriber'), __('Import Subscriber'));
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Daily Deals'));
         $resultPage->getConfig()->getTitle()
             ->prepend(__('Import Subscriber'));
 

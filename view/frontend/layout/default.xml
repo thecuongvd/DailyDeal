@@ -11,7 +11,7 @@
         </referenceBlock>
         <referenceContainer name="sidebar.main">
             <block class="Magebuzz\Dailydeal\Block\Sidebar" name="dailydeal_sidebar" template="dailydeal_sidebar.phtml"
-                ifconfig="dailydeal/general/enable" before="-" />
+                ifconfig="dailydeal/general/enable" cacheable="false" _isScopePrivate="true" before="-" />
         </referenceContainer>
     </body>
 </page>

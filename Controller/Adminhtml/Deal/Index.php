@@ -29,9 +29,9 @@ class Index extends \Magento\Backend\App\Action
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->setActiveMenu('Magebuzz_Dailydeal::manage_deals');
-        $resultPage->addBreadcrumb(__('Dailydeal'), __('Dailydeal'));
+        $resultPage->addBreadcrumb(__('Daily Deals'), __('Daily Deals'));
         $resultPage->addBreadcrumb(__('Manage Deals'), __('Manage Deals'));
-        $resultPage->getConfig()->getTitle()->prepend(__('Dailydeal'));
+        $resultPage->getConfig()->getTitle()->prepend(__('Manage Deals'));
 
         return $resultPage;
     }

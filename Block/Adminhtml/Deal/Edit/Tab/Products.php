@@ -98,26 +98,28 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
             if ($associatedProductIds) {
                 $collection->addFieldToFilter('entity_id', ['nin' => $associatedProductIds]);
             }
+            $excludedPrdType = ['configurable', 'bundle', 'grouped'];
+            $collection->addAttributeToFilter('type_id', ['nin' => $excludedPrdType]);
             $collection->addAttributeToFilter('status', ['in' => $this->_productStatus->getVisibleStatusIds()]);
             $collection->addAttributeToFilter('is_deal', 1);
                 
             //Product In Stock
-            $collection->getSelect()->distinct(true)->join(
-                ['stock_table' => $collection->getTable('cataloginventory_stock_status')],
-                'e.entity_id = stock_table.product_id',
-                [])
-                ->where('stock_table.stock_status = 1');
-            
-            $collection->setOrder('sort_order', 'ASC');
+//            $collection->getSelect()->distinct(true)->join(
+//                ['stock_table' => $collection->getTable('cataloginventory_stock_status')],
+//                'e.entity_id = stock_table.product_id',
+//                [])
+//                ->where('stock_table.stock_status = 1');
+//            
+//            $collection->setOrder('sort_order', 'ASC');
         }
-        //Add Quantity of Product and quantity > 0
+        //Add Quantity of Product
         if ($this->moduleManager->isEnabled('Magento_CatalogInventory')) {
             $collection->joinField(
                 'qty',
                 'cataloginventory_stock_item',
                 'qty',
                 'product_id=entity_id',
-                '{{table}}.stock_id=1 AND {{table}}.qty > 0',
+                '{{table}}.stock_id=1',
                 'inner'
             );
         }

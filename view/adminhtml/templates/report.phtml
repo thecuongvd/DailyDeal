@@ -10,12 +10,22 @@ if ($deal->getId()) {
         <table cellspacing="0">
             <tbody>
                 <tr>
-                    <td style="width:50%;">
+                    <td>
                         <h3 class="icon-head head-adminhtml-dailydeal">Deal Report: <?php echo $deal->getTitle(); ?></h3>
                     </td>
                 </tr>
             </tbody>
         </table>
+    </div>
+    <div class="deal-report-annotation" style="width: 30%; float:right; margin-bottom:20px;">
+        <div>
+            <div class="annotation-color" style="background-color:#f5d8d7; width:30px; height:20px; float:left;"></div>
+            <b>&nbsp;<?php echo __('Period of Deal'); ?></b>
+        </div>
+        <div style="clear:left; margin-top: 10px;">
+            <div class="annotation-color" style="background-color:#ad9ee2; width:30px; height:20px; float:left;"></div>
+            <b>&nbsp;<?php echo __('Sold Deal'); ?></b>
+        </div>
     </div>
 
     <?php
@@ -39,8 +49,6 @@ if ($deal->getId()) {
         $itemQty = 0;
         foreach ($orderItemCollection as $item) {
             $itemQty += $item->getQtyOrdered();
-            
-            
         }
         
         if ($itemQty > $maxQty) {

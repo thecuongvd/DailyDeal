@@ -2,21 +2,26 @@
 <?php
 $deals = $block->getPagedDeals();
 if ($deals->getSize()) {
-    $col = 4;
     $helper = $block->getHelper();
-    $i = 0;
-    foreach ($deals as $deal) {
-        $deal->load($deal->getId());
-        $product = $deal->getProduct();
-        if ($product && $product->getId()) {
-            if ($i++ % $col == 0) {
+    $limit = $block->getLimit();
+    ?>
+    <ul class="deal-grid">
+        <?php
+        foreach ($deals as $deal) {
+            $deal->load($deal->getId());
+            $product = $deal->getProduct();
+            if ($product && $product->getId()) {
                 ?>
-                <ul class="deal-grid">
-                <?php } ?>
-                <li class="item<?php if (($i - 1) % $col == 0) { ?> first<?php } else if ($i % $col == 0) { ?> last<?php } ?>">
+                <li class="item">
                     <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
-                        <img src="<?php echo $helper->getProductImageUrl($product, 'medium'); ?>" alt="<?php echo $product->getName() ?>" width="135"/>
+                        <img src="<?php echo $helper->getProductImageUrl($product, 'category'); ?>" alt="<?php echo $product->getName() ?>" />
+                        <div class="save-price">
+                            <div class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></div>
+                        </div>
                     </a>
+                    <h4 class="product-name"> 
+                        <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
+                    </h4>
                     <div class="deal-price">
                         <div class="price-box">
                             <p class="old-price">
@@ -26,28 +31,25 @@ if ($deals->getSize()) {
                                 <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
                             </p>
                         </div>
-                        <div class="price-save">
-                            <span class="regular-price">
-                                <span class="price"><?php echo $deal->calSaving(); ?><?php echo __('%');?></span>
-                            </span>
-                        </div>
                     </div>
-                    <h4 class="product-name"> 
-                        <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
-                    </h4>
-                    <p class="availability out-of-stock"><span><?php echo __('Sorry, this deal was sold out!');?></span></p>
+                    <p class="availability out-of-stock"><span><?php echo __('Sorry, this deal was sold out!'); ?></span></p>
                 </li>
-                <?php if ($i % $col == 0 || $i == count($deals)) { ?>
-                </ul>
                 <?php
             }
         }
+        ?>
+    </ul>
+    <?php
+    if ($deals->getSize() > $limit) {
+        ?>
+        <div class="see-all">
+            <a href='<?php echo $block->getUrl('dailydeal/index/previous'); ?>'>
+                <?php echo __('See all previous deals ...'); ?>
+            </a>
+        </div>
+        <?php
     }
-    echo $block->getPagerHtml();
+} else {
     ?>
-    <br/>
-    <!--<script type="text/javascript">decorateGeneric($$('ul.deal-grid'), ['odd', 'even', 'first', 'last'])</script>-->
-
-<?php } else { ?>
     <p class="note-msg"><?php echo __('There are no deals available.') ?></p>
 <?php } ?>
