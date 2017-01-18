@@ -13,7 +13,7 @@
                 <item name="name" xsi:type="string">import</item>
                 <item name="label" xsi:type="string" translate="true">Import Subscribers</item>
                 <item name="class" xsi:type="string">primary</item>
-                <item name="url" xsi:type="string">*/subscriber/import</item>
+                <item name="url" xsi:type="string">*/*/import</item>
             </item>
         </item>
     </argument>

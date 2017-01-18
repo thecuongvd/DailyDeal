@@ -7,7 +7,7 @@ if ($deals->getSize()) {
     ?>
     <ul class="deal-grid">
         <?php
-        foreach ($deals as $deal) {
+        foreach ($deals->getItems() as $deal) {
             $deal->load($deal->getId());
             $product = $deal->getProduct();
             if ($product && $product->getId()) {
@@ -21,7 +21,7 @@ if ($deals->getSize()) {
                     $leftText = __('Until Out of Stock');
                 }
 
-                $endTime = strtotime($deal->getEndTime());
+                $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
                 ?>
                 <li class="item">
                     <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
@@ -44,23 +44,22 @@ if ($deals->getSize()) {
                         </div>
                     </div>
                     <h4><?php echo $leftText; ?></h4>
-                    <span id="timeleft_today_<?php echo $deal->getId() ?>" class="timeleft" data-totime="<?php echo $endTime ?>"> </span>
-                    <script type="text/javascript">
-                        require(['jquery', 'dailydeal'], function ($) {
-                            $(document).ready(function () {
-                                var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                                dTimeCounter_<?php echo $deal->getId(); ?>.init('#timeleft_today_<?php echo $deal->getId() ?>');
-                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('#timeleft_today_<?php echo $deal->getId() ?>');
-                            });
-                        });
-                    </script>
+                    <span class="timeleft-today" data-totime="<?php echo $endTime; ?>"> </span>
                 </li>
                 <?php
             }
         }
         ?>
     </ul>
+    <script type="text/javascript">
+        require(['jquery', 'dailydeal_countdown'], function ($) {
+            $(document).ready(function () {
+                $('.timeleft-today').dealcountdown();
+            });
+        });
+    </script>
     <?php
+    echo $block->getPagerHtml();
     if ($deals->getSize() > $limit) {
         ?>
         <div class="see-all">

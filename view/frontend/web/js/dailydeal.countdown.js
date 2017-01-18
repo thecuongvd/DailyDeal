@@ -1,33 +1,27 @@
 /**
  * @copyright Copyright (c) 2016 www.magebuzz.com
  */
-
-function DealTimeCounter() {
-    this.init = function (end_time) {
-        this.now_time = (new Date()).getTime();
-        this.end_time = parseInt(end_time) * 1000;
-        this.end = new Date(this.end_time);
-        var endDate = this.end;
-        this.second = endDate.getSeconds();
-        this.minute = endDate.getMinutes();
-        this.hour = endDate.getHours();
-        this.day = endDate.getDate();
-        this.month = endDate.getMonth();
-        this.year = endDate.getFullYear();
+(function ($) {
+    $.fn.dealcountdown = function (options) {
+        return this.each(function () {
+            var thisJNode = $(this);
+            var timer = setTimeout(function () {
+                dealcountdown(thisJNode, options);
+            }, 1000);
+        });
     }
-    
-    this.setTimeleft = function (timeleft_id)
-    {
-        var now = new Date(this.now_time);
-        var endtext = '0';
-        var timerID;
+    function dealcountdown(timeleft_selector, options) {
+        var now_time = (new Date()).getTime() ;
+        var to_time = parseInt(timeleft_selector.data('totime')) * 1000;
+        var toDate = new Date(to_time);
+        var now = new Date(now_time);
 
-        var sec = this.second - now.getSeconds();
-        var min = this.minute - now.getMinutes();
-        var hr = this.hour - now.getHours();
-        var dy = this.day - now.getDate();
-        var mnth = this.month - now.getMonth();
-        var yr = this.year - now.getFullYear();
+        var sec = toDate.getSeconds() - now.getSeconds();
+        var min = toDate.getMinutes() - now.getMinutes();
+        var hr = toDate.getHours() - now.getHours();
+        var dy = toDate.getDate() - now.getDate();
+        var mnth = toDate.getMonth() - now.getMonth();
+        var yr = toDate.getFullYear() - now.getFullYear();
 
         var daysinmnth = 32 - new Date(now.getFullYear(), now.getMonth(), 32).getDate();
         if (sec < 0) {
@@ -82,18 +76,17 @@ function DealTimeCounter() {
             yrtext = ''
         else
             yrtext = '<li><span class="timeleft-value">' + yr + '</span><span class="timeleft-label">' + yrtext + '</span></li>'
-
         if ((mnth <= 0))
             mnthtext = ''
         else
             mnthtext = '<li><span class="timeleft-value">' + mnth + '</span><span class="timeleft-label">' + mnthtext + '</span></li>';
 
-        if (dy <= 0 && mnth > 0)
+        if (dy <= 0)
             dytext = ''
         else
             dytext = '<li><span class="timeleft-value">' + dy + '</span><span class="timeleft-label">' + dytext + '</span></li>';
 
-        if (hr <= 0 && dy > 0)
+        if (hr <= 0)
             hrtext = ''
         else
             hrtext = '<li><span class="timeleft-value">' + hr + '</span><span class="timeleft-label">' + hrtext + '</span></li>';
@@ -107,31 +100,18 @@ function DealTimeCounter() {
             sectext = ''
         else
             sectext = '<li><span class="timeleft-value">' + sec + '</span><span class="timeleft-label">' + sectext + '</span></li>';
-
-        if (now >= this.end) {
-            document.getElementById(timeleft_id).innerHTML = endtext;
-            clearTimeout(timerID);
+        if (now_time >= to_time) {
+            timeleft_selector.html('0');
         } else {
-            document.getElementById(timeleft_id).innerHTML = '<ul class="dailydeal-countdown">' + yrtext + mnthtext + dytext + hrtext + mintext + sectext + '</ul>';
+            timeleft_selector.html('<ul class="dailydeal-countdown">' + yrtext + mnthtext + dytext + hrtext + mintext + sectext + '</ul>');
+            var timer = setTimeout(function () {
+                dealcountdown(timeleft_selector, options);
+            }, 1000);
         }
-
-        if (this.now_time == this.end_time) {
+        
+        if (now_time == to_time) {
             location.reload(true);
             return;
         }
-
-        this.now_time = this.now_time + 1000; //increase 1000 miliseconds
-        var nowTimeSecond = this.now_time / 1000;
-        var endTimeSecond = this.end_time / 1000;
-        timerID = setTimeout(function(){setDealTimeleft(endTimeSecond,timeleft_id);}, 1000);
     }
-    
-    return this;
-}
-
-function setDealTimeleft(end_time, timeleft_id)
-{
-    var counter = new DealTimeCounter();
-    counter.init(end_time);
-    counter.setTimeleft(timeleft_id);
-}
+})(jQuery)

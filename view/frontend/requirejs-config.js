@@ -5,13 +5,13 @@
 var config = {
     paths: {
         fancybox: 'Magebuzz_Dailydeal/js/jquery.fancybox',
-        dailydeal: 'Magebuzz_Dailydeal/js/dailydeal'
+        dailydeal_countdown: 'Magebuzz_Dailydeal/js/dailydeal.countdown'
     },
     shim: {
         'fancybox': {
             deps: ['jquery']
         },
-        'dailydeal': {
+        'dailydeal_countdown': {
             deps: ['jquery']
         }
     }

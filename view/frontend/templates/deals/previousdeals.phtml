@@ -7,7 +7,7 @@ if ($deals->getSize()) {
     ?>
     <ul class="deal-grid">
         <?php
-        foreach ($deals as $deal) {
+        foreach ($deals->getItems() as $deal) {
             $deal->load($deal->getId());
             $product = $deal->getProduct();
             if ($product && $product->getId()) {
@@ -40,6 +40,7 @@ if ($deals->getSize()) {
         ?>
     </ul>
     <?php
+    echo $block->getPagerHtml();
     if ($deals->getSize() > $limit) {
         ?>
         <div class="see-all">

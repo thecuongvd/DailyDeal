@@ -16,7 +16,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_CONFIRM_EMAIL = 'dailydeal/subscription/confirm_email_template';
     const XML_PATH_DAILY_NOTIFY_EMAIL = 'dailydeal/subscription/email_template';
     
-    const CACHE_TODAY_DEALS_PRODUCT_IDS = 'MB_CACHE_TODAY_DEALS_PRODUCT_IDS';
+    const CACHE_TODAY_DEALS = 'MB_CACHE_TODAY_DEALS';
 
     protected $_localDeals = [];
     protected $_scopeConfig;
@@ -33,6 +33,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $inlineTranslation;
     protected $urlModel;
     protected $logger;
+    protected $_dealFactory;
 
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -49,7 +50,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Mail\Template\TransportBuilder $transportBuilder,
         \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
         \Magento\Framework\UrlFactory $urlFactory,
-        \Psr\Log\LoggerInterface $logger
+        \Psr\Log\LoggerInterface $logger,
+        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory
     )
     {
         $this->_scopeConfig = $scopeConfig;
@@ -66,7 +68,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->inlineTranslation = $inlineTranslation;
         $this->urlModel = $urlFactory->create();
         $this->logger = $logger;
-
+        $this->_dealFactory = $dealFactory;
         parent::__construct($context);
     }
     
@@ -107,6 +109,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         return $this->_date->gmtTimestamp() + $this->_date->getGmtOffset();
     }
     
+    public function getGmtTime($localTime) {
+        return $localTime - $this->_date->getGmtOffset();
+    }
+    
     public function getCurrentUrl() {
         return $this->_urlInterface->getCurrentUrl();
     }
@@ -130,23 +136,32 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             ->getUrl();
         return $imageUrl;
     }
+    
+    public function getCurrentStoreId()
+    {
+        return $this->_storeManager->getStore(true)->getId();
+    }
+    
+    public function getScopeConfig($path)
+    {
+        $storeId = $this->getCurrentStoreId();
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
+    }
 
     public function sendSubscriptionEmail($subscriberData) {
         $confirmLink = $this->urlModel->getUrl('dailydeal/subscribe/confirm', ['subscriber_id' => $subscriberData['subscriber_id'], 'confirm_code' => $subscriberData['confirm_code']]);
         $vars = [];
         $vars['customer_name'] = $subscriberData['customer_name'];
         $vars['confirm_link'] = $confirmLink;
-        $storeId = $this->_storeManager->getStore()->getId();
+        $emailSender = $this->getScopeConfig('dailydeal/subscription/email_sender');
+        $storeId = $this->getCurrentStoreId();
         $this->inlineTranslation->suspend();
         try {
             $transport = $this->_transportBuilder
-                ->setTemplateIdentifier($this->_scopeConfig->getValue(
-                    self::XML_PATH_CONFIRM_EMAIL,
-                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                    $storeId))
+                ->setTemplateIdentifier($this->getScopeConfig(self::XML_PATH_CONFIRM_EMAIL))
                 ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $storeId])
                 ->setTemplateVars($vars)
-                ->setFrom(['email' => '', 'name' => 'Customer Support'])
+                ->setFrom($emailSender)
                 ->addTo($subscriberData['email'], $subscriberData['customer_name'])
                 ->getTransport();
 
@@ -161,7 +176,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $subscribers = $this->_subscriberFactory->create()->getCollection()->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Subscriber::STATUS_ENABLED);
         if ($subscribers->getSize() > 0) {
             $dealsLink = $this->urlModel->getUrl('dailydeal');
-            $storeId = $this->_storeManager->getStore()->getId();
+            $storeId = $this->getCurrentStoreId();
+            $emailSender = $this->getScopeConfig('dailydeal/subscription/email_sender');
             foreach ($subscribers->getItems() as $subscriber) {
                 $email = $subscriber->getEmail();
                 $customerName = $subscriber->getCustomerName();
@@ -173,13 +189,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 $this->inlineTranslation->suspend();
                 try {
                     $transport = $this->_transportBuilder
-                        ->setTemplateIdentifier($this->_scopeConfig->getValue(
-                            self::XML_PATH_DAILY_NOTIFY_EMAIL,
-                            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                            $storeId))
+                        ->setTemplateIdentifier($this->getScopeConfig(self::XML_PATH_DAILY_NOTIFY_EMAIL))
                         ->setTemplateOptions(['area' => \Magento\Framework\App\Area::AREA_FRONTEND, 'store' => $storeId])
                         ->setTemplateVars($vars)
-                        ->setFrom(['email' => '', 'name' => 'Customer Support'])
+                        ->setFrom($emailSender)
                         ->addTo($email, $customerName)
                         ->getTransport();
 
@@ -190,6 +203,37 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                 }
             }
         }
+    }
+    
+    public function getLocalDeals()
+    {
+        $storeId = $this->getCurrentStoreId();
+        if ($this->_localDeals) {
+            return $this->_localDeals;
+        }
+        $cache = $this->_objectManager->get('\Magento\Framework\App\Cache');
+
+        if (($data = $cache->load(self::CACHE_TODAY_DEALS)) !== false) {
+            $this->_localDeals = unserialize($data);
+        } else {
+            $deals = $this->_dealFactory->create()->getTodayDealsEndTime();
+            foreach ($deals as $deal) {
+                $this->_localDeals[$deal['product_id']]  = strtotime($deal['end_time']);
+            }
+            $cache->save(serialize($this->_localDeals), self::CACHE_TODAY_DEALS, ['local_deals'], 7200);
+        }
+
+        return $this->_localDeals;
+    }
+    
+    public function refreshLocalDeals() {
+        $cache = $this->_objectManager->get('\Magento\Framework\App\Cache');
+        $cache->remove(self::CACHE_TODAY_DEALS);
+        $deals = $this->_dealFactory->create()->getTodayDealsEndTime();
+        foreach ($deals as $deal) {
+            $this->_localDeals[$deal['product_id']]  = strtotime($deal['end_time']);
+        }
+        $cache->save(serialize($this->_localDeals), self::CACHE_TODAY_DEALS, ['local_deals'], 7200);
     }
     
 }

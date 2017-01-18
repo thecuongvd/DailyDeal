@@ -10,7 +10,7 @@
                     ?>
                     <ul class="deal-grid">
                         <?php
-                        foreach ($deals as $deal) {
+                        foreach ($deals->getItems() as $deal) {
                             $deal->load($deal->getId());
                             $product = $deal->getProduct();
                             if ($product && $product->getId()) {

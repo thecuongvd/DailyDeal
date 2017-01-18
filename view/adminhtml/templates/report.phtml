@@ -47,7 +47,7 @@ if ($deal->getId()) {
         $orderItemCollection = $deal->getOrderItemCollection();
         $orderItemCollection->addFieldToFilter('created_at', ['from'=>$thatDateBegin, 'to'=>$thatDateEnd]);
         $itemQty = 0;
-        foreach ($orderItemCollection as $item) {
+        foreach ($orderItemCollection->getItems() as $item) {
             $itemQty += $item->getQtyOrdered();
         }
         

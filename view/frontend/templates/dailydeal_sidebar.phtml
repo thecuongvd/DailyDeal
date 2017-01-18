@@ -16,11 +16,11 @@ if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
             <div class="block-content">
                 <table id="sidebar-deal-list">
                     <?php
-                    foreach ($deals as $deal) {
+                    foreach ($deals->getItems() as $deal) {
                         $deal->load($deal->getId());
                         $product = $deal->getProduct();
                         if ($product && $product->getId() && $deal->getProductQty() > 0) {
-                            $endTime = strtotime($deal->getEndTime());
+                            $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
                             ?>
                             <tr>
                                 <td>
@@ -47,17 +47,8 @@ if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
                                     </div>
                                     <div class="timeleft-block">
                                         <label><?php echo __('DEAL TIME') ?></label>
-                                        <span id="timeleft_sidebar_<?php echo $deal->getId() ?>" class="timeleft" data-totime="<?php echo $endTime ?>"> </span>
+                                        <span class="timeleft-sidebar" data-totime="<?php echo $endTime; ?>"> </span>
                                     </div>
-                                    <script type="text/javascript">
-                                        require(['jquery', 'dailydeal'], function ($) {
-                                            $(document).ready(function () {
-                                                var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.init('#timeleft_sidebar_<?php echo $deal->getId() ?>');
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('#timeleft_sidebar_<?php echo $deal->getId() ?>');
-                                            });
-                                        });
-                                    </script>
                                     <?php
                                     if ($product->isSaleable()) {
                                         $addToCartParams = $block->getAddToCartPostParams($product);
@@ -102,6 +93,13 @@ if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
                     }
                     ?>
                 </table>
+                <script type="text/javascript">
+                    require(['jquery', 'dailydeal_countdown'], function ($) {
+                        $(document).ready(function () {
+                            $('.timeleft-sidebar').dealcountdown();
+                        });
+                    });
+                </script>
             </div>
         </div>
         <?php

@@ -16,6 +16,7 @@
             </general>
             <subscription>
                 <allow_subscribe>1</allow_subscribe>
+                <email_sender>general</email_sender>
                 <confirm_email_template>dailydeal_subscription_confirm_email_template</confirm_email_template>
                 <email_template>dailydeal_subscription_email_template</email_template>
                 <intro_message>Please enter your email to receive notification about daily deals.</intro_message>

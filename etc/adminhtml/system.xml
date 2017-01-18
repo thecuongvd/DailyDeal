@@ -60,10 +60,10 @@
                     <label>Allow Customer to Subscribe to Receive New Daily Deal Notification</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
-<!--                <field id="email_sender" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="email_sender" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Email Sender</label>
-                    <source_model>Magebuzz\Dailydeal\Model\Config\Source\EmailSender</source_model>
-                </field>-->
+                    <source_model>Magento\Config\Model\Config\Source\Email\Identity</source_model>
+                </field>
                 <field id="confirm_email_template" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Confirmation Email Template</label>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>

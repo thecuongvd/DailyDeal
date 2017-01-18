@@ -21,7 +21,7 @@ class ProductListGetFinalPrice implements ObserverInterface {
     public function execute(Observer $observer) {
         $products = $observer->getCollection();
         if ($products->getSize() > 0) {
-            foreach ($products as $product) {
+            foreach ($products->getItems() as $product) {
                 if ($this->getScopeConfig('dailydeal/general/enable')) {
                     $deal = $this->_dealFactory->create()->loadByProductId($product->getId());
                     if ($deal->getId()) {

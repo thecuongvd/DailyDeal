@@ -158,4 +158,7 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         return $this->_orderItemCollectionFactory->create()->addFieldToFilter('product_id', $this->getProductId());
     }
 
+    public function getTodayDealsEndTime() {
+        return $this->getResource()->getTodayDealsEndTime();
+    }
 }

@@ -10,7 +10,7 @@
                     ?>
                     <ul class="deal-grid">
                         <?php
-                        foreach ($deals as $deal) {
+                        foreach ($deals->getItems() as $deal) {
                             $deal->load($deal->getId());
                             $product = $deal->getProduct();
                             if ($product && $product->getId()) {
@@ -47,22 +47,21 @@
                                         </div>
                                     </div>
                                     <h4><?php echo $leftText; ?></h4>
-                                    <span id="timeleft_coming_<?php echo $deal->getId() ?>" class="timeleft" data-totime="<?php echo $startTime ?>"> </span>
-                                    <script type="text/javascript">
-                                        require(['jquery', 'dailydeal'], function ($) {
-                                            $(document).ready(function () {
-                                                var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.init('#timeleft_coming_<?php echo $deal->getId() ?>');
-                                                dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('#timeleft_coming_<?php echo $deal->getId() ?>');
-                                            });
-                                        });
-                                    </script>
+                                    <span class="timeleft-coming" data-totime="<?php echo $startTime ?>"> </span>
+                                    
                                 </li>
                                 <?php
                             }
                         }
                         ?>
                     </ul>
+                    <script type="text/javascript">
+                        require(['jquery', 'dailydeal_countdown'], function ($) {
+                            $(document).ready(function () {
+                                $('.timeleft-coming').dealcountdown();
+                            });
+                        });
+                    </script>
                     <?php
                 } else {
                     ?>

@@ -14,17 +14,23 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     protected $_dealStoreTable;
     protected $_productFactory;
     protected $_date;
+    protected $_storeManager;
+    protected $_dailydealHelper;
 
     public function __construct(
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Catalog\Model\ProductFactory $prductFactory,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
+        \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
         $resourcePrefix = null
     )
     {
         parent::__construct($context, $resourcePrefix);
         $this->_productFactory = $prductFactory;
         $this->_date = $date;
+        $this->_storeManager = $storeManager;
+        $this->_dailydealHelper = $dailydealHelper;
     }
     
     protected function _construct()
@@ -105,7 +111,19 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
             }
         }
         
+        //Refresh cache for deals
+        $this->_dailydealHelper->refreshLocalDeals();
         return $this;
+    }
+    
+    protected function _afterDelete(AbstractModel $object) {
+        $this->_dailydealHelper->refreshLocalDeals();
+        return $this;
+    }
+    
+    public function getCurrentStoreId()
+    {
+        return $this->_storeManager->getStore(true)->getId();
     }
     
     public function getDealByProductId($productId) {
@@ -115,4 +133,27 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         return $this->getConnection()->fetchOne($select);
     }
 
+    public function getTodayDealsEndTime() {
+        $productTable = $this->getTable('catalog_product_entity');
+        $dailydealTable = $this->getTable('dailydeal_deal');
+        $dealStoreTable = $this->getTable('dailydeal_deal_store');
+        $storeIds = [0, $this->getCurrentStoreId()];
+
+        $select = $this->getConnection()->quoteInto("
+            SELECT d.`product_id`, d.`end_time`
+            FROM $dailydealTable as d
+            INNER JOIN $dealStoreTable as s
+                ON s.`deal_id` = d.`deal_id`
+            INNER JOIN $productTable as p
+                ON d.`product_id` = p.`entity_id`
+            WHERE (d.`start_time` < now() AND d.`end_time` > now())
+                AND d.`status` = " . \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED . "
+                AND (d.`quantity` - d.`sold`) > 0
+                AND s.`store_id` IN (?)
+            GROUP BY d.`product_id`
+            ORDER BY d.`price` ASC
+        ", $storeIds);
+
+        return $this->getConnection()->fetchAll($select);
+    }
 }

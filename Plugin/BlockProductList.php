@@ -7,19 +7,24 @@ namespace Magebuzz\Dailydeal\Plugin;
 
 class BlockProductList
 {
+    const CACHE_TODAY_DEALS = 'MB_CACHE_TODAY_DEALS';
+    
     protected $_scopeConfig;
     protected $_dealFactory;
     protected $_dailydealHelper;
+    protected $_objectManager;
 
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
-        \Magebuzz\Dailydeal\Helper\Data $dailydealHelper
+        \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
+        \Magento\Framework\ObjectManagerInterface $objectManager
     )
     {
         $this->_scopeConfig = $scopeConfig;
         $this->_dealFactory = $dealFactory;
         $this->_dailydealHelper = $dailydealHelper;
+        $this->_objectManager = $objectManager;
     }
 
     public function aroundGetProductPrice(
@@ -30,20 +35,24 @@ class BlockProductList
     {
         $result = $proceed($product);
         if ($this->getScopeConfig('dailydeal/general/enable')) {
-            $deal = $this->_dealFactory->create()->loadByProductId($product->getId());
-            if ($deal->getId() && $deal->isAvailable()) {
-                $endTime = strtotime($deal->getEndTime());
+            $cache = $this->_objectManager->get('\Magento\Framework\App\Cache');
+            if (($data = $cache->load(self::CACHE_TODAY_DEALS)) !== false) {
+                $localDeals = unserialize($data);
+            } else {
+                $localDeals = $this->_dailydealHelper->getLocalDeals();
+            }
+            $productId = $product->getId();
+            if (!empty($localDeals[$productId])) {
+                $endTime = $localDeals[$productId];
                 $result .= '
                 <div class="dailydeal-cat timeleft-block">
                     <label>' . __('DEAL TIME') . '</label>
-                    <span id="timeleft_cat_' . $deal->getId() . '" class="timeleft" data-totime="' . $endTime . '"> </span>
+                    <span class="timeleft-cat" data-totime="' . $endTime . '"> </span>
                 </div>
                 <script type="text/javascript">
-                    require(["jquery", "dailydeal"], function ($) {
+                    require(["jquery", "dailydeal_countdown"], function ($) {
                         $(document).ready(function () {
-                            var dTimeCounter_' . $deal->getId() . ' = new DealTimeCounter();
-                            dTimeCounter_' . $deal->getId() .'.init("#timeleft_cat_' . $deal->getId() . '");
-                            dTimeCounter_' . $deal->getId() . '.setTimeleft("#timeleft_cat_' . $deal->getId() . '");
+                            $(".timeleft-cat").dealcountdown();
                         });
                     });
                 </script>

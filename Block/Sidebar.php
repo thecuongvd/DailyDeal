@@ -72,9 +72,15 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
         return $this->_dailydealHelper;
     }
 
+    public function getCurrentStoreId()
+    {
+        return $this->_storeManager->getStore(true)->getId();
+    }
+    
     public function getScopeConfig($path)
     {
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $storeId = $this->getCurrentStoreId();
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getTodayDealCollection()
@@ -86,12 +92,6 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
             ->setStoreFilter($storeIds)
             ->setOrder('start_time', 'ASC');
         return $collection;
-    }
-
-    public function getCurrentStoreId()
-    {
-        return $this->_storeManager->getStore(true)->getId();
-
     }
     
     public function getAddToCartPostParams(\Magento\Catalog\Model\Product $product)

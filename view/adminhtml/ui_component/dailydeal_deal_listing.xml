@@ -9,6 +9,12 @@
         </item>
         <item name="spinner" xsi:type="string">dailydeal_deal_columns</item>
         <item name="buttons" xsi:type="array">
+            <item name="import" xsi:type="array">
+                <item name="name" xsi:type="string">import</item>
+                <item name="label" xsi:type="string" translate="true">Import Deals</item>
+                <item name="class" xsi:type="string">default</item>
+                <item name="url" xsi:type="string">*/*/import</item>
+            </item>
             <item name="add" xsi:type="array">
                 <item name="name" xsi:type="string">add</item>
                 <item name="label" xsi:type="string" translate="true">Add New Deal</item>

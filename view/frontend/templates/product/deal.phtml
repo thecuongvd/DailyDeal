@@ -25,14 +25,12 @@ if ($deal->getId() && $deal->isAvailable()) {
                     <h3 class="saving"><?php echo __('Saving: ') . $deal->calSaving() . __('%'); ?></h3>
                 <?php } ?>
                 <h4 class="dealtime-label"><?php echo $block->getScopeConfig('dailydeal/product_detail/timeleft_label'); ?></h4>
-                <div id="timeleft-product" class="timeleft" data-totime="<?php echo $endTime ?>"> </div>
+                <div class="timeleft-product" data-totime="<?php echo $endTime; ?>"> </div>
                 <h5><?php echo $leftText; ?></h5>
                 <script type="text/javascript">
-                    require(['jquery', 'dailydeal'], function ($) {
+                    require(['jquery', 'dailydeal_countdown'], function ($) {
                         $(document).ready(function () {
-                            var dTimeCounter_<?php echo $deal->getId(); ?> = new DealTimeCounter();
-                            dTimeCounter_<?php echo $deal->getId(); ?>.init('#timeleft-product');
-                            dTimeCounter_<?php echo $deal->getId(); ?>.setTimeleft('#timeleft-product');
+                            $('.timeleft-product').dealcountdown();
                         });
                     });
                 </script>

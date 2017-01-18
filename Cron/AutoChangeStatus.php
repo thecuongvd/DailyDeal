@@ -47,7 +47,7 @@ class AutoChangeStatus
         $deals = $this->_dealFactory->create()->getCollection();
         if (count($deals) > 0) {
             try {
-                foreach ($deals as $deal) {
+                foreach ($deals->getItems() as $deal) {
                     $now = $this->_date->gmtTimestamp();
                     $startTime = strtotime($deal->getStartTime());
                     $endTime = strtotime($deal->getEndTime());

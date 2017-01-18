@@ -32,7 +32,7 @@ class MassEnable extends \Magento\Backend\App\Action
     {
         $collection = $this->filter->getCollection($this->collectionFactory->create());
 
-        foreach ($collection as $item) {
+        foreach ($collection->getItems() as $item) {
             $item->setStatus(true);
             $item->save();
         }

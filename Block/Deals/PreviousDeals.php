@@ -58,6 +58,11 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
         return $limit;
     }
     
+    public function getPagerHtml()
+    {
+        return $this->getChildHtml('pager');
+    }
+    
     public function getPagedDeals()
     {
         return $this->_deals;
@@ -67,9 +72,15 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
         return $this->_dailydealHelper;
     }
 
+    public function getCurrentStoreId()
+    {
+        return $this->_storeManager->getStore(true)->getId();
+    }
+    
     public function getScopeConfig($path)
     {
-        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
+        $storeId = $this->getCurrentStoreId();
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
     }
 
     public function getPreviousDealCollection()
@@ -81,11 +92,6 @@ class PreviousDeals extends \Magento\Framework\View\Element\Template
             ->setStoreFilter($storeIds)
             ->setOrder('price', 'ASC');
         return $collection;
-    }
-
-    public function getCurrentStoreId()
-    {
-        return $this->_storeManager->getStore(true)->getId();
     }
     
 }

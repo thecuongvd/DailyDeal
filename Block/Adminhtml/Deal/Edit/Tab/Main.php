@@ -165,7 +165,7 @@ class Main extends Generic
         );
 
         if (!$deal->getId()) {                         //Add new
-            $deal->setData('status', '1');
+            $deal->setData('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED);
         }
 
         $form->setValues($deal->getData());

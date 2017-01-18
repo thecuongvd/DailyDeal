@@ -91,7 +91,7 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
         } else {                                                                //Add New
             $associatedProductIds = [];
             $deals = $this->_dealFactory->create()->getCollection();
-            foreach ($deals as $deal) {
+            foreach ($deals->getItems() as $deal) {
                 $associatedProductIds[] = $deal->getProductId();
             }
 
