@@ -129,6 +129,9 @@ ul.deal-grid {list-style-type: none;}
 .price-box .special-price {
   display: inline-block;
 }
+.price-box .special-price {
+    font-weight: bold;
+}
 .price-box .old-price .price-label,
 .price-box .special-price .price-label {
   display: none;

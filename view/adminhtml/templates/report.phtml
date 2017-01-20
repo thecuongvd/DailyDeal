@@ -34,7 +34,6 @@ if ($deal->getId()) {
     $toTime = strtotime($deal->getEndTime());
     $currentTime = $helper->getCurrentTime();
     $days = (int) ($toTime - $fromTime) / $x_unit;
-    $productId = $deal->getProductId();
 
     $graph = [];
     $maxQty = 0;

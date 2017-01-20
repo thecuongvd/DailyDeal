@@ -34,6 +34,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     protected $urlModel;
     protected $logger;
     protected $_dealFactory;
+    protected $_productFactory;
 
     public function __construct(
         \Magento\Framework\App\Helper\Context $context,
@@ -51,7 +52,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         \Magento\Framework\Translate\Inline\StateInterface $inlineTranslation,
         \Magento\Framework\UrlFactory $urlFactory,
         \Psr\Log\LoggerInterface $logger,
-        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory
+        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
+        \Magento\Catalog\Model\ProductFactory $productFactory
     )
     {
         $this->_scopeConfig = $scopeConfig;
@@ -69,6 +71,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         $this->urlModel = $urlFactory->create();
         $this->logger = $logger;
         $this->_dealFactory = $dealFactory;
+        $this->_productFactory = $productFactory;
         parent::__construct($context);
     }
     
@@ -95,6 +98,22 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return $this->stockItem->getStockQty($productId, $product->getStore()->getWebsiteId());
         } 
         return 0;
+    }
+        
+    public function calSaving($product) {
+        $isRoundSaving = $this->getScopeConfig('dailydeal/general/is_round_saving');
+        if ($product && $product->getPrice() > 0) {
+            $deal = $this->_dealFactory->create()->loadByProductId($product->getId());
+            $decrease = floatval($product->getPrice()) - floatval($deal->getPrice());
+            if ($isRoundSaving) {
+                $saving = round(100 * $decrease / floatval($product->getPrice()), 0);
+            } else {
+                $saving = round(100 * $decrease / floatval($product->getPrice()), 2);
+            }
+        } else {
+            $saving = 0;
+        }
+        return $saving;
     }
     
     public function getPriceWithCurrency($price)
@@ -205,8 +224,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
     }
     
-    public function getLocalDeals()
-    {
+    public function getLocalDeals() {
         $storeId = $this->getCurrentStoreId();
         if ($this->_localDeals) {
             return $this->_localDeals;
@@ -234,6 +252,10 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             $this->_localDeals[$deal['product_id']]  = strtotime($deal['end_time']);
         }
         $cache->save(serialize($this->_localDeals), self::CACHE_TODAY_DEALS, ['local_deals'], 7200);
+    }
+    
+    public function getProductById($productId) {
+        return $this->_productFactory->create()->load($productId);
     }
     
 }

@@ -256,7 +256,7 @@
                             <item name="required-entry" xsi:type="boolean">true</item>
                         </item>
                     </item>
-                    <item name="label" xsi:type="string" translate="true">Title</item>
+                    <item name="label" xsi:type="string" translate="true">Product</item>
                 </item>
             </argument>
         </column>
@@ -276,6 +276,16 @@
                     <item name="sorting" xsi:type="string">asc</item>
                     <item name="dataType" xsi:type="string">number</item>
                     <item name="label" xsi:type="string" translate="true">Quantity</item>
+                </item>
+            </argument>
+        </column>
+        <column name="sold">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="filter" xsi:type="string">textRange</item>
+                    <item name="sorting" xsi:type="string">asc</item>
+                    <item name="dataType" xsi:type="string">number</item>
+                    <item name="label" xsi:type="string" translate="true">Sold</item>
                 </item>
             </argument>
         </column>

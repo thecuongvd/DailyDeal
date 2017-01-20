@@ -1,53 +1,69 @@
 <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <?php
-$deals = $block->getPagedDeals();
+$limit = $block->getLimit();
+$deals = $block->getTodayDealCollection()->limit($limit);
 if ($deals->getSize()) {
     $helper = $block->getHelper();
-    $limit = $block->getLimit();
+    $prdCount = 1;
+    $isLimit = false;
     ?>
     <ul class="deal-grid">
         <?php
         foreach ($deals->getItems() as $deal) {
-            $deal->load($deal->getId());
-            $product = $deal->getProduct();
-            if ($product && $product->getId()) {
-                $remainQuantity = $deal->getQuantity() - $deal->getSold();
-                $productQuantity = $helper->getProductQuantity($product);
-                if ($productQuantity <= 0) {
-                    $leftText = __('Sorry, this product is sold out!');
-                } else if ($remainQuantity < $productQuantity) {
-                    $leftText = __('For only ' . $remainQuantity . ' item(s)!');
-                } else {
-                    $leftText = __('Until Out of Stock');
-                }
-
-                $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
-                ?>
-                <li class="item">
-                    <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
-                        <img src="<?php echo $helper->getProductImageUrl($product, 'category'); ?>" alt="<?php echo $product->getName() ?>" />
-                        <div class="save-price">
-                            <div class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></div>
-                        </div>
-                    </a>
-                    <h4 class="product-name"> 
-                        <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
-                    </h4>
-                    <div class="deal-price">
-                        <div class="price-box">
-                            <p class="old-price">
-                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
-                            </p>
-                            <p class="special-price">
-                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
-                            </p>
-                        </div>
-                    </div>
-                    <h4><?php echo $leftText; ?></h4>
-                    <span class="timeleft-today" data-totime="<?php echo $endTime; ?>"> </span>
-                </li>
-                <?php
+            if ($prdCount > $limit) {
+                $isLimit = true;
+                break;
             }
+            $deal->load($deal->getId());
+            $productIds = $deal->getProductIds();
+            foreach ($productIds as $productId) {
+                if ($prdCount > $limit) {
+                    $isLimit = true;
+                    break;
+                }
+                $product = $helper->getProductById($productId);
+                if ($product && $product->getId()) {
+                    $prdCount++;
+                    $remainQuantity = $deal->getQuantity() - $deal->getSold();
+                    $productQuantity = $helper->getProductQuantity($product);
+                    if ($productQuantity <= 0) {
+                        $leftText = __('Sorry, this product is sold out!');
+                    } else if ($remainQuantity < $productQuantity) {
+                        $leftText = __('For only ' . $remainQuantity . ' item(s)!');
+                    } else {
+                        $leftText = __('Until Out of Stock');
+                    }
+
+                    $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
+                    ?>
+                    <li class="item">
+                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
+                            <img src="<?php echo $helper->getProductImageUrl($product, 'category'); ?>" alt="<?php echo $product->getName() ?>" />
+                            <div class="save-price">
+                                <div class="price"><?php echo $helper->calSaving($product); ?><?php echo __('%'); ?></div>
+                            </div>
+                        </a>
+                        <h4 class="product-name">
+                            <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
+                        </h4>
+                        <div class="deal-price">
+                            <div class="price-box">
+                                <p class="special-price">
+                                    <span class="price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                                </p>
+                                <p class="old-price">
+                                    <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
+                                </p>
+                            </div>
+                        </div>
+                        <h4><?php echo $leftText; ?></h4>
+                        <span class="timeleft-today" data-totime="<?php echo $endTime; ?>"> </span>
+                    </li>
+                    <?php
+                }
+                
+            }
+            
         }
         ?>
     </ul>
@@ -59,8 +75,7 @@ if ($deals->getSize()) {
         });
     </script>
     <?php
-    echo $block->getPagerHtml();
-    if ($deals->getSize() > $limit) {
+    if ($isLimit || $deals->getSize() > $limit) {
         ?>
         <div class="see-all">
             <a href='<?php echo $block->getUrl('dailydeal/index/today'); ?>'>

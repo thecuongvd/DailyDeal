@@ -12,8 +12,6 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
     protected $_storeManager;
     protected $_dailydealHelper;
     
-    protected $_deals;
-
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
         \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
@@ -28,26 +26,11 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
         $this->_scopeConfig = $scopeConfig;
         $this->_storeManager = $storeManager;
         $this->_dailydealHelper = $dailydealHelper;
-        $this->_deals = $this->getTodayDealCollection();
     }
 
     public function getIdentities()
     {
         return [\Magebuzz\Dailydeal\Model\Deal::CACHE_TAG . '_' . 'today'];
-    }
-    
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-        if ($this->_deals) {
-            $limit = $this->getLimit();
-            $pager = $this->getLayout()->createBlock('Magento\Theme\Block\Html\Pager', 'dailydeal.todaydeals.pager')
-                ->setLimit($limit)
-                ->setCollection($this->_deals);
-            $this->setChild('pager', $pager);
-            $this->_deals->load();
-        }
-        return $this;
     }
     
     public function getLimit() {
@@ -58,16 +41,6 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
         return $limit;
     }
     
-    public function getPagerHtml()
-    {
-        return $this->getChildHtml('pager');
-    }
-    
-    public function getPagedDeals()
-    {
-        return $this->_deals;
-    }
-    
     public function getHelper() {
         return $this->_dailydealHelper;
     }
@@ -75,7 +48,7 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
     public function getCurrentStoreId()
     {
         return $this->_storeManager->getStore(true)->getId();
-    }
+    } 
     
     public function getScopeConfig($path)
     {
@@ -91,6 +64,7 @@ class TodayDeals extends \Magento\Framework\View\Element\Template
             ->setTodayFilter()
             ->setRemain()
             ->setStoreFilter($storeIds) 
+            
             ->setOrder('price', 'ASC');
         return $collection;
     }

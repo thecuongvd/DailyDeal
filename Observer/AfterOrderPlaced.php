@@ -24,8 +24,8 @@ class AfterOrderPlaced implements ObserverInterface {
     public function execute(Observer $observer) {
 
         $orderModel = $observer->getOrder();
-        $items = $orderModel->getItemsCollection();
-        foreach ($items->getItems() as $item) {
+        $items = $orderModel->getItems();
+        foreach ($items as $item) {
             if ($this->getScopeConfig('dailydeal/general/enable')) {
                 $deal = $this->_dealFactory->create()->loadByProductId($item->getProductId());
                 if ($deal->getId() && $deal->isAvailable()) {

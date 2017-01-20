@@ -4,12 +4,14 @@
 use Magento\Framework\App\Action\Action;
 
 if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
-    $deals = $block->getPagedDeals();
+    $limit = $block->getLimit();
+    $deals = $block->getTodayDealCollection()->limit($limit);
     ?>
     <?php
     if ($deals->getSize()) {
         $helper = $block->getHelper();
-        $limit = $block->getLimit();
+        $prdCount = 1;
+        $isLimit = false;
         ?>
         <div class="block block-todaydeals">
             <div class="block-title"><h3><?php echo __('Today Deals'); ?></h3></div>
@@ -17,68 +19,77 @@ if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
                 <table id="sidebar-deal-list">
                     <?php
                     foreach ($deals->getItems() as $deal) {
-                        $deal->load($deal->getId());
-                        $product = $deal->getProduct();
-                        if ($product && $product->getId() && $deal->getProductQty() > 0) {
-                            $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
-                            ?>
-                            <tr>
-                                <td>
-                                    <div class="product-deal-image">
-                                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
-                                            <img src="<?php echo $helper->getProductImageUrl($product, 'small'); ?>" alt="<?php echo $product->getName(); ?>" />
-                                        </a>
-                                    </div>
-                                    <div class="product-deal-name">
-                                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
-                                            <?php echo $product->getName(); ?>
-                                        </a>
-                                    </div>
-                                    <div class="deal-price">
-                                        <div class="price-box">
-                                            <label><?php echo __('Price:') ?> </label>
-                                            <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
-                                            <span class="special-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
-                                        </div>
-                                    </div>
-                                    <div class="save-price">
-                                        <label><?php echo __('Saving:') ?> </label>
-                                        <span class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></span>
-                                    </div>
-                                    <div class="timeleft-block">
-                                        <label><?php echo __('DEAL TIME') ?></label>
-                                        <span class="timeleft-sidebar" data-totime="<?php echo $endTime; ?>"> </span>
-                                    </div>
-                                    <?php
-                                    if ($product->isSaleable()) {
-                                        $addToCartParams = $block->getAddToCartPostParams($product);
-                                        ?>
-                                        <div class="actions-primary">
-                                            <form data-role="tocart-form" 
-                                                  action="<?php echo $addToCartParams['url']; ?>" 
-                                                  method="post">
-                                                <input type="hidden" name="product" value="<?php echo $addToCartParams['product']; ?>">
-                                                <input type="hidden" name="<?php echo Action::PARAM_NAME_URL_ENCODED; ?>" 
-                                                       value="<?php echo $addToCartParams[Action::PARAM_NAME_URL_ENCODED]; ?>">
-                                                <input name="form_key" type="hidden" value="<?php echo $addToCartParams['formkey']; ?>">                                            
-                                                <button type="submit" title="<?php echo __('Add to Cart'); ?>" class="action tocart primary">
-                                                    <span><?php echo __('Add to Cart'); ?></span>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    <?php } ?>
-
-                                </td>
-                            </tr>
-                            <?php
+                        if ($prdCount > $limit) {
+                            $isLimit = true;
+                            break;
                         }
+                        $deal->load($deal->getId());
+                        $productIds = $deal->getProductIds();
+                        foreach ($productIds as $productId) {
+                            if ($prdCount > $limit) {
+                                $isLimit = true;
+                                break;
+                            }
+                            $product = $helper->getProductById($productId);
+                            if ($product && $product->getId()) {
+                                $prdCount++;
+                                $endTime = $helper->getGmtTime(strtotime($deal->getEndTime()));
+                                ?>
+                                <tr>
+                                    <td>
+                                        <div class="product-deal-image">
+                                            <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
+                                                <img src="<?php echo $helper->getProductImageUrl($product, 'small'); ?>" alt="<?php echo $product->getName(); ?>" />
+                                            </a>
+                                        </div>
+                                        <div class="product-deal-name">
+                                            <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>">
+                                                <?php echo $product->getName(); ?>
+                                            </a>
+                                        </div>
+                                        <div class="deal-price">
+                                            <div class="price-box">
+                                                <label><?php echo __('Price:') ?> </label>
+                                                <span class="special-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                                                <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
+                                            </div>
+                                        </div>
+                                        <div class="save-price">
+                                            <label><?php echo __('Saving:') ?> </label>
+                                            <span class="price"><?php echo $helper->calSaving($product); ?><?php echo __('%'); ?></span>
+                                        </div>
+                                        <div class="timeleft-block">
+                                            <label><?php echo __('DEAL TIME') ?></label>
+                                            <span class="timeleft-sidebar" data-totime="<?php echo $endTime; ?>"> </span>
+                                        </div>
+                                        <?php
+                                        if ($product->isSaleable()) {
+                                            $addToCartParams = $block->getAddToCartPostParams($product);
+                                            ?>
+                                            <div class="actions-primary">
+                                                <form data-role="tocart-form" 
+                                                      action="<?php echo $addToCartParams['url']; ?>" 
+                                                      method="post">
+                                                    <input type="hidden" name="product" value="<?php echo $addToCartParams['product']; ?>">
+                                                    <input type="hidden" name="<?php echo Action::PARAM_NAME_URL_ENCODED; ?>" 
+                                                           value="<?php echo $addToCartParams[Action::PARAM_NAME_URL_ENCODED]; ?>">
+                                                    <input name="form_key" type="hidden" value="<?php echo $addToCartParams['formkey']; ?>">                                            
+                                                    <button type="submit" title="<?php echo __('Add to Cart'); ?>" class="action tocart primary">
+                                                        <span><?php echo __('Add to Cart'); ?></span>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        <?php } ?>
+
+                                    </td>
+                                </tr>
+                                <?php
+                            }
+                            
+                        }
+                        
                     }
-                    ?>
-                    <tr>
-                        <td style="border-bottom:none;"><?php echo __('There are ' . $deals->getSize() . ' deal(s) today'); ?></td>
-                    </tr>
-                    <?php
-                    if ($deals->getSize() > $limit) {
+                    if ($isLimit || $deals->getSize() > $limit) {
                         ?>
                         <tr>
                             <td>

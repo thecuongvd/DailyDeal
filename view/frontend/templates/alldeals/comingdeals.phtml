@@ -7,50 +7,55 @@
                 $deals = $block->getComingDealCollection();
                 if ($deals->getSize()) {
                     $helper = $block->getHelper();
+                    $prdCount = 0;
                     ?>
                     <ul class="deal-grid">
                         <?php
                         foreach ($deals->getItems() as $deal) {
                             $deal->load($deal->getId());
-                            $product = $deal->getProduct();
-                            if ($product && $product->getId()) {
-                                $remainQuantity = $deal->getQuantity() - $deal->getSold();
-                                $productQuantity = $helper->getProductQuantity($product);
-                                if ($productQuantity <= 0) {
-                                    $leftText = __('Sorry, this product is sold out!');
-                                } else if ($remainQuantity < $productQuantity) {
-                                    $leftText = __('For only ' . $remainQuantity . ' item(s)!');
-                                } else {
-                                    $leftText = __('Until Out of Stock');
-                                }
+                            $productIds = $deal->getProductIds();
+                            foreach ($productIds as $productId) {
+                                $product = $helper->getProductById($productId);
+                                if ($product && $product->getId()) {
+                                    $prdCount++;
+                                    $remainQuantity = $deal->getQuantity() - $deal->getSold();
+                                    $productQuantity = $helper->getProductQuantity($product);
+                                    if ($productQuantity <= 0) {
+                                        $leftText = __('Sorry, this product is sold out!');
+                                    } else if ($remainQuantity < $productQuantity) {
+                                        $leftText = __('For only ' . $remainQuantity . ' item(s)!');
+                                    } else {
+                                        $leftText = __('Until Out of Stock');
+                                    }
 
-                                $startTime = strtotime($deal->getStartTime());
-                                ?>
-                                <li class="item">
-                                    <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
-                                        <img src="<?php echo $helper->getProductImageUrl($product, 'category'); ?>" alt="<?php echo $product->getName() ?>" />
-                                        <div class="save-price">
-                                            <div class="price"><?php echo $deal->calSaving(); ?><?php echo __('%'); ?></div>
+                                    $startTime = strtotime($deal->getStartTime());
+                                    ?>
+                                    <li class="item">
+                                        <a href="<?php echo $product->getProductUrl(); ?>" title="<?php echo $product->getName(); ?>" class="product-image">
+                                            <img src="<?php echo $helper->getProductImageUrl($product, 'category'); ?>" alt="<?php echo $product->getName() ?>" />
+                                            <div class="save-price">
+                                                <div class="price"><?php echo $helper->calSaving($product); ?><?php echo __('%'); ?></div>
+                                            </div>
+                                        </a>
+                                        <h4 class="product-name"> 
+                                            <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
+                                        </h4>
+                                        <div class="deal-price">
+                                            <div class="price-box">
+                                                <p class="special-price">
+                                                    <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
+                                                </p>
+                                                <p class="old-price">
+                                                    <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
+                                                </p>
+                                            </div>
                                         </div>
-                                    </a>
-                                    <h4 class="product-name"> 
-                                        <a href="<?php echo $product->getProductUrl() ?>" title="<?php echo $product->getName() ?>"><?php echo $product->getName() ?></a>
-                                    </h4>
-                                    <div class="deal-price">
-                                        <div class="price-box">
-                                            <p class="old-price">
-                                                <span class="price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
-                                            </p>
-                                            <p class="special-price">
-                                                <span class="price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <h4><?php echo $leftText; ?></h4>
-                                    <span class="timeleft-coming" data-totime="<?php echo $startTime ?>"> </span>
-                                    
-                                </li>
-                                <?php
+                                        <h4><?php echo $leftText; ?></h4>
+                                        <span class="timeleft-coming" data-totime="<?php echo $startTime ?>"> </span>
+
+                                    </li>
+                                    <?php
+                                }
                             }
                         }
                         ?>
@@ -62,6 +67,7 @@
                             });
                         });
                     </script>
+                    <div><?php echo __('There are ' . $prdCount . ' coming deal product(s)'); ?></div>
                     <?php
                 } else {
                     ?>

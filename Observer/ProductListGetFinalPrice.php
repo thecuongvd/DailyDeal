@@ -27,8 +27,11 @@ class ProductListGetFinalPrice implements ObserverInterface {
                     if ($deal->getId()) {
                         $startTime = date('Y-m-d H:i:s', strtotime($deal->getStartTime()) - 86400);
                         $endTime = date('Y-m-d H:i:s', strtotime($deal->getEndTime()) - 86400);
-                        $product->setData('special_from_date', $startTime);
-                        $product->setData('special_to_date', $endTime);
+                        $product->setSpecialFromDate($startTime);
+                        $product->setSpecialToDate($endTime);
+                        if ($deal->isAvailable()) {
+                            $product->setSpecialPrice($deal->getPrice());
+                        }
                     }
                 } 
             }

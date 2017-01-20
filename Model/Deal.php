@@ -81,32 +81,6 @@ class Deal extends \Magento\Framework\Model\AbstractModel
                 ];
     }
     
-//    public function getProduct() {
-//        $product = $this->_productFactory->create()->load($this->getProductId());
-//        if ($product->getId()) {
-//            return $product;
-//        }
-//        return null;
-//    }
-
-    public function getProductPrice()
-    {
-        $product = $this->getProduct();
-        if ($product && $product->getId()) {
-            return number_format($product->getPrice(), 2);
-        } 
-        return '0.00';
-    }
-    
-    public function getProductQty()
-    {
-        $product = $this->getProduct();
-        if ($product && $productId = $product->getId()) {
-            return $this->stockItem->getStockQty($productId, $product->getStore()->getWebsiteId());
-        } 
-        return 0;
-    }
-    
     public function loadByProductId($productId) {
         $dealId = $this->getResource()->getDealByProductId($productId);
         return $this->load($dealId);
@@ -115,22 +89,6 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     public function getScopeConfig($path)
     {
         return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE);
-    }
-    
-    public function calSaving() {
-        $isRoundSaving = $this->getScopeConfig('dailydeal/general/is_round_saving');
-        $product = $this->getProduct();
-        if ($product && $product->getPrice() > 0) {
-            $decrease = floatval($product->getPrice()) - floatval($this->getPrice());
-            if ($isRoundSaving) {
-                $saving = round(100 * $decrease / floatval($product->getPrice()), 0);
-            } else {
-                $saving = round(100 * $decrease / floatval($product->getPrice()), 2);
-            }
-        } else {
-            $saving = 0;
-        }
-        return $saving;
     }
     
     public function isAvailable() {
@@ -155,10 +113,23 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     
     public function getOrderItemCollection()
     {
-        return $this->_orderItemCollectionFactory->create()->addFieldToFilter('product_id', $this->getProductId());
+        $productIds = $this->getProductIds();
+        return $this->_orderItemCollectionFactory->create()->addFieldToFilter('product_id', ['in' => $productIds]);
     }
 
     public function getTodayDealsEndTime() {
         return $this->getResource()->getTodayDealsEndTime();
+    }
+    
+    public function getTitleFromProducts() {
+        $product = $this->_productFactory->create();
+        $title = '';
+        $productIds = $this->getProductIds();
+        foreach ($productIds as $productId) { 
+            $product->load($productId);
+            $title .= $product->getName() . ',';
+        }
+        $title = rtrim($title, ',');
+        return $title;
     }
 }

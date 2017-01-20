@@ -81,18 +81,19 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
         $collection = $this->_linkFactory->create()->getProductCollection()
             ->addAttributeToSelect('*');
         $dealId = $this->getRequest()->getParam('deal_id');
-        $deal = $this->_dealFactory->create();
-        if ($dealId) {
-            $deal->load($dealId);
-        }
-        if ($deal->getId() && $deal->getProductId()) {                          //Edit
-            $productId = $deal->getProductId();
-            $collection->addFieldToFilter('entity_id', $productId);
-        } else {                                                                //Add New
+        $deal = $this->_dealFactory->create()->load($dealId); 
+        
+        if ($deal->getId() && $productIds=$deal->getProductIds()) {             //Edit
+            $collection->addFieldToFilter('entity_id', ['in' => $productIds]);
+        } else {                                                                //Add new
             $associatedProductIds = [];
             $deals = $this->_dealFactory->create()->getCollection();
             foreach ($deals->getItems() as $deal) {
-                $associatedProductIds[] = $deal->getProductId();
+                $deal->load($deal->getId());
+                $dealProductIds = $deal->getProductIds();
+                foreach ($dealProductIds as $id) {
+                    $associatedProductIds[] = $id;
+                }
             }
 
             if ($associatedProductIds) {
@@ -102,16 +103,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
             $collection->addAttributeToFilter('type_id', ['nin' => $excludedPrdType]);
             $collection->addAttributeToFilter('status', ['in' => $this->_productStatus->getVisibleStatusIds()]);
             $collection->addAttributeToFilter('is_deal', 1);
-                
-            //Product In Stock
-//            $collection->getSelect()->distinct(true)->join(
-//                ['stock_table' => $collection->getTable('cataloginventory_stock_status')],
-//                'e.entity_id = stock_table.product_id',
-//                [])
-//                ->where('stock_table.stock_status = 1');
-//            
-//            $collection->setOrder('sort_order', 'ASC');
         }
+           
         //Add Quantity of Product
         if ($this->moduleManager->isEnabled('Magento_CatalogInventory')) {
             $collection->joinField(
@@ -128,6 +121,68 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
+    
+    /**
+     * Add filter
+     *
+     * @param object $column
+     * @return $this
+     */
+    protected function _addColumnFilterToCollection($column)
+    {
+        // Set custom filter for in product flag
+        if ($column->getId() == 'in_products') {
+            $productIds = $this->_getSelectedProductIds();
+            if (empty($productIds)) {
+                $productIds = 0;
+            }
+            if ($column->getFilter()->getValue()) {
+                $this->getCollection()->addFieldToFilter('entity_id', ['in' => $productIds]);
+            } else {
+                if ($productIds) {
+                    $this->getCollection()->addFieldToFilter('entity_id', ['nin' => $productIds]);
+                }
+            }
+        } else {
+            parent::_addColumnFilterToCollection($column);
+        }
+        return $this;
+    }
+
+    /**
+     * Retrieve selected items key
+     *
+     * @return array
+     */
+    protected function _getSelectedProductIds()
+    {
+        $products = array_keys($this->getSelectedProductIds());
+        return $products;
+    }
+
+    /**
+     * Retrieve selected items key
+     *
+     * @return array
+     */
+    public function getSelectedProductIds()
+    {
+        $dealId = $this->getRequest()->getParam('deal_id');
+        $deal = $this->_dealFactory->create()->load($dealId);
+        $productIds = $deal->getProductIds();
+
+        if (!$productIds) {
+            return [];
+        }
+
+        $productIdArr = [];
+
+        foreach ($productIds as $productId) {
+            $productIdArr[$productId] = ['id' => $productId];
+        }
+
+        return $productIdArr;
+    }
 
     /**
      * Add columns to grid
@@ -137,14 +192,17 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
      */
     protected function _prepareColumns()
     {
+        $dealId = $this->getRequest()->getParam('deal_id');
         $this->addColumn(
-            'in_product',
+            'in_products',
             [
-                'type' => 'radio',
-                'html_name' => 'product_id',
-                'values' => $this->_getSelectedProduct(),
+                'type' => $dealId ? 'hidden' : 'checkbox',
+                'name' => 'in_products',
+                'values' => $this->_getSelectedProductIds(),
                 'align' => 'center',
                 'index' => 'entity_id',
+                'header_css_class' => 'col-select',
+                'column_css_class' => 'col-select',
             ]
         );
         
@@ -155,6 +213,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                 'sortable' => true,
                 'type' => 'number',
                 'index' => 'entity_id',
+                'header_css_class' => 'col-id',
+                'column_css_class' => 'col-id'
             ]
         );
         
@@ -163,6 +223,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
             [
                 'header' => __('Name'),
                 'index' => 'name',
+                'header_css_class' => 'col-name',
+                'column_css_class' => 'col-name'
             ]
         );
         $this->addColumn(
@@ -245,23 +307,21 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                 'options' => $this->_productStatus->getOptionArray(),
             ]
         );
+        $this->addColumn(
+            'position',
+            [
+                'header' => __('Position'),
+                'name' => 'position',
+                'type' => 'number',
+                'validate_class' => 'validate-number',
+                'index' => 'position',
+                'editable' => true,
+                'edit_only' => true,
+                'header_css_class' => 'col-position',
+                'column_css_class' => 'col-position'
+            ]
+        );
 
         return parent::_prepareColumns();
-    }
-
-    /**
-     * Retrieve selected items key
-     *
-     * @return array
-     */
-    protected function _getSelectedProduct()
-    {
-        $dealId = $this->getRequest()->getParam('deal_id', 0);
-        $deal = $this->_dealFactory->create();
-        if ($dealId) {
-            $deal->load($dealId);
-        }
-        $productIdArr = [$deal->getProductId()];
-        return $productIdArr;
     }
 }

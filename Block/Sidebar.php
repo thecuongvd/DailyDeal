@@ -12,8 +12,6 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
     protected $_dailydealHelper;
     protected $urlHelper;
     protected $_formKey;
-    
-    protected $_deals;
 
     public function __construct(
         \Magento\Catalog\Block\Product\Context $context,
@@ -33,26 +31,11 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
         $this->_dailydealHelper = $dailydealHelper;
         $this->urlHelper = $urlHelper;
         $this->_formKey = $formKey;
-        $this->_deals = $this->getTodayDealCollection();
     }
 
     public function getIdentities()
     {
         return [\Magebuzz\Dailydeal\Model\Deal::CACHE_TAG . '_' . 'sidebar'];
-    }
-    
-    protected function _prepareLayout()
-    {
-        parent::_prepareLayout();
-        if ($this->_deals) {
-            $limit = $this->getLimit();
-            $pager = $this->getLayout()->createBlock('Magento\Theme\Block\Html\Pager', 'dailydeal.sidebardeals.pager')
-                ->setLimit($limit)
-                ->setCollection($this->_deals);
-            $this->setChild('pager', $pager);
-            $this->_deals->load();
-        }
-        return $this;
     }
     
     public function getLimit() {
@@ -63,15 +46,10 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
         return $limit;
     }
     
-    public function getPagedDeals()
-    {
-        return $this->_deals;
-    }
-    
     public function getHelper() {
         return $this->_dailydealHelper;
     }
-
+    
     public function getCurrentStoreId()
     {
         return $this->_storeManager->getStore(true)->getId();

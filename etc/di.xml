@@ -1,6 +1,9 @@
 <?xml version="1.0"?>
  <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!--Override Model-->
+    <preference for="Magento\Catalog\Model\ResourceModel\Product" type="Magebuzz\Dailydeal\Model\Catalog\ResourceModel\Product" />
+    
     <!--Plugin-->
     <type name="Magento\Catalog\Block\Product\ListProduct">
         <plugin name="magebuzz-dailydeal-block-product-list" 

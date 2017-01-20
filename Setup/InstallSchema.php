@@ -27,18 +27,34 @@ class InstallSchema implements InstallSchemaInterface
             ->addColumn('price', Table::TYPE_DECIMAL, '10,2', ['nullable' => false, 'default' => '0.00'])
             ->addColumn('quantity', Table::TYPE_INTEGER, 11, ['nullable' => false, 'default' => '0'])
             ->addColumn('sold', Table::TYPE_INTEGER, 11, ['nullable' => false, 'default' => '0'])
-            ->addColumn('product_id', Table::TYPE_INTEGER, 11, ['unsigned' => true, 'nullable' => false])
             ->addColumn('start_time', Table::TYPE_DATETIME, null, [])
             ->addColumn('end_time', Table::TYPE_DATETIME, null, [])
             ->addColumn('progress_status', Table::TYPE_TEXT, 10, ['nullable' => false, 'default' => ''])
             ->addColumn('status', Table::TYPE_SMALLINT, 6, ['unsigned' => true, 'nullable' => false, 'default' => '1'])
+            ->setComment('Daily Deal');
+        $installer->getConnection()->createTable($table);
+        
+        $table = $installer->getConnection()
+            ->newTable($installer->getTable('dailydeal_deal_product'))
+            ->addColumn(
+                'deal_id', Table::TYPE_INTEGER, 11, ['unsigned' => true, 'nullable' => false, 'primary' => true]
+            )
+            ->addColumn(
+                'product_id', Table::TYPE_INTEGER, 11, ['unsigned' => true, 'nullable' => false, 'primary' => true]
+            )
             ->addIndex(
-                $installer->getIdxName('dailydeal_deal', ['product_id']), ['product_id']
+                $installer->getIdxName('dailydeal_deal_product', ['deal_id']), ['deal_id']
+            )
+            ->addIndex(
+                $installer->getIdxName('dailydeal_deal_product', ['product_id']), ['product_id']
             )
             ->addForeignKey(
-                $installer->getFkName('dailydeal_deal', 'product_id', 'catalog_product_entity', 'entity_id'), 'product_id', $installer->getTable('catalog_product_entity'), 'entity_id', Table::ACTION_CASCADE
+                $installer->getFkName('dailydeal_deal_product', 'deal_id', 'dailydeal_deal', 'deal_id'), 'deal_id', $installer->getTable('dailydeal_deal'), 'deal_id', Table::ACTION_CASCADE
             )
-            ->setComment('Daily Deal');
+            ->addForeignKey(
+                $installer->getFkName('dailydeal_deal_product', 'product_id', 'catalog_product_entity', 'entity_id'), 'product_id', $installer->getTable('catalog_product_entity'), 'entity_id', Table::ACTION_CASCADE
+            )
+            ->setComment('Deal Product');
         $installer->getConnection()->createTable($table);
         
         $table = $installer->getConnection()

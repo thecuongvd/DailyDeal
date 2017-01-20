@@ -8,8 +8,5 @@
     <event name="sales_order_place_after">
         <observer name="magebuzz_dailydeal_after_place_order" instance="Magebuzz\Dailydeal\Observer\AfterOrderPlaced" />
     </event>
-    
-    <event name="catalog_product_delete_after_done">
-        <observer name="magebuzz_dailydeal_product_delete_after" instance="Magebuzz\Dailydeal\Observer\ProductDeleteAfter" />
-    </event>
+
 </config>

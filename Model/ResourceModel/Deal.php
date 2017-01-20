@@ -12,7 +12,9 @@ use Magento\Framework\Model\AbstractModel;
 class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
     protected $_dealStoreTable;
+    protected $_dealProductTable;
     protected $_productFactory;
+    protected $_dealFactory;
     protected $_date;
     protected $_storeManager;
     protected $_dailydealHelper;
@@ -20,6 +22,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     public function __construct(
         \Magento\Framework\Model\ResourceModel\Db\Context $context,
         \Magento\Catalog\Model\ProductFactory $prductFactory,
+        \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
         \Magento\Framework\Stdlib\DateTime\DateTime $date,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magebuzz\Dailydeal\Helper\Data $dailydealHelper,
@@ -28,6 +31,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     {
         parent::__construct($context, $resourcePrefix);
         $this->_productFactory = $prductFactory;
+        $this->_dealFactory = $dealFactory;
         $this->_date = $date;
         $this->_storeManager = $storeManager;
         $this->_dailydealHelper = $dailydealHelper;
@@ -37,6 +41,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     {
         $this->_init('dailydeal_deal', 'deal_id');
         $this->_dealStoreTable = $this->getTable('dailydeal_deal_store');
+        $this->_dealProductTable = $this->getTable('dailydeal_deal_product');
         
     }
     
@@ -48,14 +53,11 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         return $this->getConnection()->fetchCol($select);
     }
     
-    public function getProduct($productId) {
-        if ($productId) {
-            $product = $this->_productFactory->create()->load($productId);
-            if ($product->getId()) {
-                return $product;
-            }
-        }
-        return null;
+    public function getProductIds($dealId) {
+        $select = $this->getConnection()->select()->from(
+            $this->getTable($this->_dealProductTable), 'product_id')
+            ->where('deal_id = ?', $dealId);
+        return $this->getConnection()->fetchCol($select);
     }
     
     protected function _afterLoad(AbstractModel $object)
@@ -77,7 +79,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 
         if ($object->getId()) {
             $object->setStores($this->getStoreIds((int)$object->getId()));
-            $object->setProduct($this->getProduct((int)$object->getProductId()));
+            $object->setProductIds($this->getProductIds((int)$object->getId()));
         }
         return $this;
     }
@@ -93,22 +95,50 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     protected function _afterSave(AbstractModel $object)
     {
         $connection = $this->getConnection();
+        
+        //Save Deal Stores
         $condition = ['deal_id = ?' => $object->getId()];
         $connection->delete($this->_dealStoreTable, $condition);
-        
-        //Save Deal Store
         $stores = $object->getStores();
         if (!empty($stores)) {
             $insertedStoreIds = [];
+            $fullStoreIds = $this->getAllStoreIds();
             foreach ($stores as $storeId) {
-                if (in_array($storeId, $insertedStoreIds)) {
+                if (in_array($storeId, $insertedStoreIds) || !in_array((int)$storeId, $fullStoreIds)) {
                     continue;
                 }
-
                 $insertedStoreIds[] = $storeId;
                 $storeInsert = ['store_id' => $storeId, 'deal_id' => $object->getId()];
                 $connection->insert($this->_dealStoreTable, $storeInsert);
             }
+        }
+        
+        //Save Deal Products
+        $productIds = $object->getProductIds();
+        if ($object->isObjectNew() && !empty($productIds)) {  // When product is selected
+            $insertedProductIds = [];
+            foreach ($productIds as $productId) {
+                if (in_array($productId, $insertedProductIds)) {
+                    continue;
+                }
+                $insertedProductIds[] = $productId;
+                $insert = ['product_id' => $productId, 'deal_id' => $object->getId()];
+                $connection->insert($this->_dealProductTable, $insert);
+            }
+        }
+        
+        //Save Special Price for Product
+        $localStartTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getStartTime()) + $this->_date->getGmtOffset());
+        $localEndTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getEndTime()) + $this->_date->getGmtOffset());
+        foreach ($productIds as $id) {
+            $product = $this->_productFactory->create();
+            $product->load($id);
+            $product->setSpecialPrice($object->getPrice());
+            $product->setSpecialFromDate($localStartTime);
+            $product->setSpecialFromDateIsFormated(true);
+            $product->setSpecialToDate($localEndTime);
+            $product->setSpecialToDateIsFormated(true);
+            $product->save();
         }
         
         //Refresh cache for deals
@@ -121,39 +151,79 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         return $this;
     }
     
+    protected function _beforeDelete(AbstractModel $object)
+    {
+        $dealId = $object->getId();
+        $deals = $this->_dealFactory->create()->load($dealId); 
+        $productIds = $deals->getProductIds();
+        foreach ($productIds as $productId) {
+            $product = $this->_productFactory->create()->load($productId);
+            $product->setSpecialPrice(null);
+            $product->setSpecialFromDate(null);
+            $product->setSpecialToDate(null);
+            $product->save();
+        } 
+        return parent::_beforeDelete($object);
+    }
+    
     public function getCurrentStoreId()
     {
         return $this->_storeManager->getStore(true)->getId();
     }
     
+    public function getAllStoreIds() {
+        $stores = $this->_storeManager->getStores();
+        $ids = array_keys($stores);
+        array_unshift($ids, 0); 
+        return $ids;
+    } 
+
     public function getDealByProductId($productId) {
-        $select = $this->getConnection()->select()->from(
-            $this->getTable($this->getTable('dailydeal_deal')), 'deal_id')
-            ->where('product_id = ?', $productId);
+        $dailydealTable = $this->getTable('dailydeal_deal');
+        $dealProductTable = $this->getTable('dailydeal_deal_product');
+        $dealStoreTable = $this->getTable('dailydeal_deal_store');
+        $storeIds = ['0', $this->getCurrentStoreId()];
+
+        $select = $this->getConnection()->quoteInto("
+            SELECT d.`deal_id`
+            FROM $dailydealTable as d
+            INNER JOIN $dealStoreTable as s
+                ON s.`deal_id` = d.`deal_id`
+            INNER JOIN $dealProductTable as dp
+                ON d.`deal_id` = dp.`deal_id`
+                AND s.`store_id` IN (?)
+                AND dp.product_id = $productId
+            GROUP BY d.`deal_id`
+        ", $storeIds);
         return $this->getConnection()->fetchOne($select);
     }
 
     public function getTodayDealsEndTime() {
         $productTable = $this->getTable('catalog_product_entity');
         $dailydealTable = $this->getTable('dailydeal_deal');
+        $dealProductTable = $this->getTable('dailydeal_deal_product');
         $dealStoreTable = $this->getTable('dailydeal_deal_store');
         $storeIds = [0, $this->getCurrentStoreId()];
 
         $select = $this->getConnection()->quoteInto("
-            SELECT d.`product_id`, d.`end_time`
+            SELECT dp.`product_id`, d.`end_time`
             FROM $dailydealTable as d
             INNER JOIN $dealStoreTable as s
                 ON s.`deal_id` = d.`deal_id`
+            INNER JOIN $dealProductTable as dp
+                ON d.`deal_id` = dp.`deal_id`
             INNER JOIN $productTable as p
-                ON d.`product_id` = p.`entity_id`
+                ON dp.`product_id` = p.`entity_id`
             WHERE (d.`start_time` < now() AND d.`end_time` > now())
                 AND d.`status` = " . \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED . "
                 AND (d.`quantity` - d.`sold`) > 0
                 AND s.`store_id` IN (?)
-            GROUP BY d.`product_id`
+            GROUP BY dp.`product_id`
             ORDER BY d.`price` ASC
         ", $storeIds);
 
         return $this->getConnection()->fetchAll($select);
     }
+    
+
 }

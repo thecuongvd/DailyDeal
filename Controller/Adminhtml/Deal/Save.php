@@ -10,14 +10,20 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 class Save extends \Magento\Backend\App\Action
 {
     protected $_date;
+    protected $jsHelper;
+    protected $_productFactory;
 
     public function __construct(
         Action\Context $context,
-        \Magento\Framework\Stdlib\DateTime\DateTime $date
-    )
+        \Magento\Framework\Stdlib\DateTime\DateTime $date,
+        \Magento\Backend\Helper\Js $jsHelper,
+        \Magento\Catalog\Model\ProductFactory $productFactory
+    ) 
     {
         parent::__construct($context);
         $this->_date = $date;
+        $this->jsHelper = $jsHelper;
+        $this->_productFactory = $productFactory;
     }
 
     /**
@@ -38,6 +44,7 @@ class Save extends \Magento\Backend\App\Action
                 if ($id != $deal->getId()) {
                     throw new \Magento\Framework\Exception\LocalizedException(__('The wrong deal is specified'));
                 }
+                $data['product_ids'] = $deal->getProductIds();
             }
 
             //Check if time is valid
@@ -54,8 +61,8 @@ class Save extends \Magento\Backend\App\Action
             }
             
             //Check if add new and product is selected
-            if (!$id && empty($data['product_id'])) {
-                $this->messageManager->addError(__('You must select a product before saving'));
+            if (!$id && empty($data['product_ids'])) {
+                $this->messageManager->addError(__('You must select product before saving'));
                 $this->_getSession()->setFormData($data);
                 if ($id) {
                     return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
@@ -65,8 +72,6 @@ class Save extends \Magento\Backend\App\Action
             }
 
             //Process time
-            $localStartTime = $data['start_time'];
-            $localEndTime = $data['end_time'];
             $localeDate = $this->_objectManager->get('Magento\Framework\Stdlib\DateTime\TimezoneInterface');
             $data['start_time'] = $localeDate->date($data['start_time'])->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
             $data['end_time'] = $localeDate->date($data['end_time'])->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
@@ -85,22 +90,27 @@ class Save extends \Magento\Backend\App\Action
             }
             $data['progress_status'] = $progressStatus;
             
-            $deal->setData($data);
+            //Process product_ids data and set title when add new
+            
+            if (!$id) {     
+                $data['product_ids'] = array_keys($this->jsHelper->decodeGridSerializedInput($data['product_ids']));
+                $product = $this->_productFactory->create();
+                $title = '';
+                foreach ($data['product_ids'] as $productId) { 
+                    $product->load($productId);
+                    $title .= $product->getName() . ',';
+                }
+                $title = rtrim($title, ',');
+                $data['title'] = $title;
+            }
 
+            $deal->setData($data);
             $this->_eventManager->dispatch(
                 'dailydeal_deal_prepare_save', ['deal' => $deal, 'request' => $this->getRequest()]
             );
 
             try {
                 $deal->save();
-                //Save Special Price for Product
-                $product = $deal->load($deal->getId())->getProduct();
-                $product->setSpecialPrice($data['price']);
-                $product->setSpecialFromDate($localStartTime);
-                $product->setSpecialFromDateIsFormated(true);
-                $product->setSpecialToDate($localEndTime);
-                $product->setSpecialToDateIsFormated(true);
-                $product->save();
                 
                 $this->messageManager->addSuccess(__('You saved this Deal'));
                 $this->_objectManager->get('Magento\Backend\Model\Session')->setFormData(false);

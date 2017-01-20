@@ -88,19 +88,31 @@ class SaveImport extends \Magento\Backend\App\Action {
                     if (empty($data['stores'])) {
                         continue;
                     } else {
-                        $data['stores'] = explode($data['stores']); 
+                        $data['stores'] = explode(',',$data['stores']); 
                     } 
                     
                     //Process product
-                    if (empty($data['product_id'])) {
+                    if (empty($data['product_ids'])) {
                         continue;
-                    } else {
-                        if (in_array($data['product_id'], $validPrdIds)) {
-                            $data['title'] = $product->load($data['product_id'])->getName();
-                        } else {
-                            continue;
+                    } 
+                    $productIds = explode(',', $data['product_ids']);
+                    foreach ($productIds as $key=>$productId) {
+                        if (!in_array($productId, $validPrdIds)) {
+                            unset($productIds[$key]);
                         }
                     }
+                    if (empty($productIds)) {
+                        continue;
+                    }
+                    $product = $this->_productFactory->create();
+                    $title = '';
+                    foreach ($productIds as $productId) { 
+                        $product->load($productId);
+                        $title .= $product->getName() . ',';
+                    }
+                    $title = rtrim($title, ',');
+                    $data['title'] = $title;
+                    $data['product_ids'] = $productIds;
                    
                     //Process time
                     $localStartTime = $data['start_time'];
@@ -123,14 +135,6 @@ class SaveImport extends \Magento\Backend\App\Action {
                     $data['progress_status'] = $progressStatus;
                     
                     $deal->setData($data)->save();
-                    //Save Special Price for Product
-                    $product = $deal->load($deal->getId())->getProduct();
-                    $product->setSpecialPrice($data['price']);
-                    $product->setSpecialFromDate($localStartTime);
-                    $product->setSpecialFromDateIsFormated(true);
-                    $product->setSpecialToDate($localEndTime);
-                    $product->setSpecialToDateIsFormated(true);
-                    $product->save();
                     $flag = true;
                     $i++;
                 }
@@ -155,7 +159,11 @@ class SaveImport extends \Magento\Backend\App\Action {
         $associatedProductIds = [];
         $deals = $this->_dealFactory->create()->getCollection();
         foreach ($deals->getItems() as $deal) {
-            $associatedProductIds[] = $deal->getProductId();
+            $deal->load($deal->getId());
+            $dealProductIds = $deal->getProductIds();
+            foreach ($dealProductIds as $id) {
+                $associatedProductIds[] = $id;
+            }
         }
         
         if ($associatedProductIds) {
