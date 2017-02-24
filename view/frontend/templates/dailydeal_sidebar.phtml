@@ -50,7 +50,7 @@ if ($block->getScopeConfig('dailydeal/general/show_on_sidebar')) {
                                         <div class="deal-price">
                                             <div class="price-box">
                                                 <label><?php echo __('Price:') ?> </label>
-                                                <span class="special-price"><?php echo $helper->getPriceWithCurrency($product->getFinalPrice()); ?></span>
+                                                <span class="special-price"><?php echo $helper->getPriceWithCurrency($deal->getPrice()); ?></span>
                                                 <span class="old-price"><?php echo $helper->getPriceWithCurrency($product->getPrice()); ?></span>
                                             </div>
                                         </div>

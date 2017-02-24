@@ -59,7 +59,8 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     
     public function setComingFilter()
     {
-        $this->getSelect()->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.start_time) > 0');
+        $this->getSelect()->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.start_time) > 0')
+                ->where('(main_table.quantity - main_table.sold) > 0');
         return $this;
     }
     
@@ -67,14 +68,15 @@ class Collection extends \Magento\Framework\Model\ResourceModel\Db\Collection\Ab
     {
         $this->getSelect()
                 ->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.start_time) < 0')
-                ->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.end_time) > 0');
+                ->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.end_time) > 0')
+                ->where('(main_table.quantity - main_table.sold) > 0');
         return $this;
     }
     
     public function setPreviousFilter()
     {
         $this->getSelect()
-                ->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.end_time) < 0');
+                ->where('TIMESTAMPDIFF(SECOND,UTC_TIMESTAMP(),main_table.end_time) < 0 OR (main_table.quantity - main_table.sold) <= 0');
         return $this;
     }
     

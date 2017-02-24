@@ -115,7 +115,7 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         
         //Save Deal Products
         $productIds = $object->getProductIds();
-        if ($object->isObjectNew() && !empty($productIds)) {  // When product is selected
+        if ($object->isObjectNew() && !empty($productIds)) { //When create new and product is selected
             $insertedProductIds = [];
             foreach ($productIds as $productId) {
                 if (in_array($productId, $insertedProductIds)) {
@@ -128,17 +128,20 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
         }
         
         //Save Special Price for Product
-        $localStartTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getStartTime()) + $this->_date->getGmtOffset());
-        $localEndTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getEndTime()) + $this->_date->getGmtOffset());
-        foreach ($productIds as $id) {
-            $product = $this->_productFactory->create();
-            $product->load($id);
-            $product->setSpecialPrice($object->getPrice());
-            $product->setSpecialFromDate($localStartTime);
-            $product->setSpecialFromDateIsFormated(true);
-            $product->setSpecialToDate($localEndTime);
-            $product->setSpecialToDateIsFormated(true);
-            $product->save();
+        $deal = $this->_dealFactory->create()->load($object->getId()); 
+        if ($deal->isNotEnded()) {
+            $localStartTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getStartTime()) + $this->_date->getGmtOffset());
+            $localEndTime = date('Y-m-d H:i:s', $this->_date->timestamp($object->getEndTime()) + $this->_date->getGmtOffset());
+            foreach ($productIds as $id) {
+                $product = $this->_productFactory->create()->load($id);
+                $product->setSpecialPrice($object->getPrice());
+                $product->setSpecialFromDate($localStartTime);
+                $product->setSpecialFromDateIsFormated(true);
+                $product->setSpecialToDate($localEndTime);
+                $product->setSpecialToDateIsFormated(true);
+                $product->setStoreId(0);
+                $product->save();
+            }
         }
         
         //Refresh cache for deals
@@ -147,25 +150,40 @@ class Deal extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
     }
     
     protected function _afterDelete(AbstractModel $object) {
+        //Save Special Price for Product
+        $productIds = $this->getProductIds((int)$object->getId());
+        foreach ($productIds as $id) {
+            $product = $this->_productFactory->create()->load($id);
+            if ($product->getId()) {
+                $product->setSpecialPrice(null);
+                $product->setSpecialFromDate(null);
+                $product->setSpecialFromDateIsFormated(true);
+                $product->setSpecialToDate(null);
+                $product->setSpecialToDateIsFormated(true);
+                $product->setStoreId(0);
+                $product->save();
+            }
+        }
+        
+        //Delete product_deal association
+        $condition = ['deal_id = ?' => $object->getId()];
+        $connection = $this->getConnection();
+        $connection->delete($this->_dealProductTable, $condition);
+        
+        //Refresh cache for deals
         $this->_dailydealHelper->refreshLocalDeals();
-        return $this;
+        return parent::_afterDelete($object);
     }
     
-    protected function _beforeDelete(AbstractModel $object)
-    {
-        $dealId = $object->getId();
-        $deals = $this->_dealFactory->create()->load($dealId); 
-        $productIds = $deals->getProductIds();
-        foreach ($productIds as $productId) {
-            $product = $this->_productFactory->create()->load($productId);
-            $product->setSpecialPrice(null);
-            $product->setSpecialFromDate(null);
-            $product->setSpecialToDate(null);
-            $product->save();
-        } 
-        return parent::_beforeDelete($object);
+    public function deleteAssociations($productId) {
+        if ($productId) {
+            $condition = ['product_id = ?' => $productId];
+            $connection = $this->getConnection();
+            $connection->delete($this->_dealProductTable, $condition);
+        }
     }
-    
+
+
     public function getCurrentStoreId()
     {
         return $this->_storeManager->getStore(true)->getId();

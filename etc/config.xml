@@ -13,6 +13,7 @@
                 <show_on_sidebar>1</show_on_sidebar>
                 <num_of_sidebar_deals>6</num_of_sidebar_deals>
                 <is_round_saving>1</is_round_saving>
+                <apply_is_deal>0</apply_is_deal>
             </general>
             <subscription>
                 <allow_subscribe>1</allow_subscribe>

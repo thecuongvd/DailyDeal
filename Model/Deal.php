@@ -32,6 +32,7 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     protected $urlModel;
     protected $_formKey;
     protected $_orderItemCollectionFactory;
+    protected $cart;
 
     public function __construct(
         \Magento\Framework\Model\Context $context,
@@ -44,6 +45,7 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         \Magento\Framework\UrlFactory $urlFactory,
         \Magento\Framework\Data\Form\FormKey $formKey,
         \Magento\Sales\Model\ResourceModel\Order\Item\CollectionFactory $orderItemCollectionFactory,
+        \Magento\Checkout\Model\Cart $cart,
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = [])
@@ -56,6 +58,7 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         $this->urlModel = $urlFactory->create();
         $this->_formKey = $formKey;
         $this->_orderItemCollectionFactory = $orderItemCollectionFactory;
+        $this->cart = $cart;
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -81,6 +84,36 @@ class Deal extends \Magento\Framework\Model\AbstractModel
                 ];
     }
     
+    public function getProductPrice()
+    {
+        $product = $this->_productFactory->create();
+        $minProductPrice = 0;
+        $productIds = $this->getProductIds();
+        if ($productIds && is_array($productIds) && count($productIds) > 0) {
+            $productPrices = [];
+            foreach ($productIds as $productId) {
+                $product->load($productId);
+                $productPrices[] = $product->getPrice();
+            }
+            $minProductPrice = min($productPrices);
+        }
+        return number_format($minProductPrice, 2);
+    }
+    
+    public function getProductQty()
+    {
+        $product = $this->_productFactory->create();
+        $productQty = 0;
+        $productIds = $this->getProductIds();
+        if ($productIds && is_array($productIds) && count($productIds) > 0) {
+            foreach ($productIds as $productId) {
+                $product->load($productId);
+                $productQty += $this->stockItem->getStockQty($productId, $product->getStore()->getWebsiteId());
+            }
+        }
+        return number_format($productQty, 2);
+    }
+    
     public function loadByProductId($productId) {
         $dealId = $this->getResource()->getDealByProductId($productId);
         return $this->load($dealId);
@@ -95,7 +128,19 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         $nowTime = $this->_dailydealHelper->getCurrentTime() ;
         $startTime = strtotime($this->getStartTime());
         $endTime = strtotime($this->getEndTime());
-        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && (($this->getQuantity() - $this->getSold()) > 0) && ($startTime <= $nowTime) && ($nowTime <= $endTime)) {
+        $remain = $this->getQuantity() - $this->getSold();
+        
+        $totalInCart = 0;
+        $dealProductIds = $this->getProductIds();
+        $cart = $this->cart->getQuote();
+        foreach ($cart->getAllItems() as $item) {
+            $productId = $item->getProductId(); 
+            if (in_array($productId, $dealProductIds)) {
+                $totalInCart += $item->getQty();
+            }
+        }
+        
+        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && ($remain > 0) && ($startTime <= $nowTime) && ($nowTime <= $endTime)) {
             return true;
         }
         return false;
@@ -105,7 +150,8 @@ class Deal extends \Magento\Framework\Model\AbstractModel
         $nowTime = $this->_dailydealHelper->getCurrentTime() ;
         $startTime = strtotime($this->getStartTime());
         $endTime = strtotime($this->getEndTime());
-        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && (($this->getQuantity() - $this->getSold()) > 0) && ($nowTime <= $endTime)) {
+        $remain = $this->getQuantity() - $this->getSold();
+        if (($this->getStatus() == \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED) && ($remain > 0) && ($nowTime <= $endTime)) {
             return true;
         }
         return false;
@@ -114,7 +160,14 @@ class Deal extends \Magento\Framework\Model\AbstractModel
     public function getOrderItemCollection()
     {
         $productIds = $this->getProductIds();
-        return $this->_orderItemCollectionFactory->create()->addFieldToFilter('product_id', ['in' => $productIds]);
+        $startTime = $this->getStartTime();
+        $endTime = $this->getEndTime();
+        $collection = $this->_orderItemCollectionFactory->create()
+                ->addFieldToFilter('product_id', ['in' => $productIds]);
+        $collection->getSelect()
+                ->where("TIMESTAMPDIFF(SECOND,'$startTime',main_table.created_at) > 0")
+                ->where("TIMESTAMPDIFF(SECOND,'$endTime',main_table.created_at) < 0");
+        return $collection;
     }
 
     public function getTodayDealsEndTime() {

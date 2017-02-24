@@ -68,7 +68,7 @@ class Sidebar extends \Magento\Catalog\Block\Product\AbstractProduct
             ->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED)
             ->setTodayFilter()
             ->setStoreFilter($storeIds)
-            ->setOrder('start_time', 'ASC');
+            ->setOrder('deal_id', 'DESC');
         return $collection;
     }
     

@@ -36,7 +36,7 @@
                     </depends>
                 </field>
                 <field id="deal_per_page" translate="label" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Number of Deals on Grid (Each Type)</label>
+                    <label>Number of Deals on Main Page (Each Type)</label>
                     <validate>validate-digits validate-greater-than-zero</validate>
                 </field>
                 <field id="show_on_sidebar" translate="label" type="select" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -50,6 +50,10 @@
                 <field id="is_round_saving" translate="label" type="select" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Round up Saving Number</label>
                     <comment><![CDATA[If select 'Yes', saving number will be shown as integer without decimal places]]></comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="apply_is_deal" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Apply Is_deal Field in Filtering Product When Creating Deal</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                 </field>
             </group>

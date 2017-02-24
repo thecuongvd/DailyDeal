@@ -31,14 +31,16 @@ class Product extends \Magento\Catalog\Model\ResourceModel\Product
         $this->_dealFactory = $dealFactory;
     }
     
-    protected function _beforeDelete(\Magento\Framework\DataObject $object)
+    protected function _afterDelete(\Magento\Framework\DataObject $object)
     {
         $productId = $object->getId();
         $deal = $this->_dealFactory->create()->loadByProductId($productId);
         if ($deal->getId() && count($deal->getProductIds()) == 1) {
             $deal->delete();
+        } else {
+            $deal->getResource()->deleteAssociations($productId);
         }
-        return parent::_beforeDelete($object);
+        return parent::_afterDelete($object);
     }
 
 }

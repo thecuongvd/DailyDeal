@@ -48,12 +48,6 @@ class InstallSchema implements InstallSchemaInterface
             ->addIndex(
                 $installer->getIdxName('dailydeal_deal_product', ['product_id']), ['product_id']
             )
-            ->addForeignKey(
-                $installer->getFkName('dailydeal_deal_product', 'deal_id', 'dailydeal_deal', 'deal_id'), 'deal_id', $installer->getTable('dailydeal_deal'), 'deal_id', Table::ACTION_CASCADE
-            )
-            ->addForeignKey(
-                $installer->getFkName('dailydeal_deal_product', 'product_id', 'catalog_product_entity', 'entity_id'), 'product_id', $installer->getTable('catalog_product_entity'), 'entity_id', Table::ACTION_CASCADE
-            )
             ->setComment('Deal Product');
         $installer->getConnection()->createTable($table);
         

@@ -46,7 +46,7 @@ class Subscribe extends Action
                 return $resultRedirect->setPath('dailydeal');
             }
         } else {
-            $this->messageManager->addError(__('This email has been used to subscriber. Please use other email and try again!'));
+            $this->messageManager->addError(__('This email has been assigned to another subscriber. Please use another email and try again!'));
             return $resultRedirect->setPath('dailydeal');
         }
 

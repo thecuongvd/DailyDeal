@@ -46,31 +46,6 @@ class Save extends \Magento\Backend\App\Action
                 }
                 $data['product_ids'] = $deal->getProductIds();
             }
-
-            //Check if time is valid
-            $startTime = strtotime($data['start_time']);
-            $endTime = strtotime($data['end_time']);
-            if ($startTime >= $endTime) {
-                $this->messageManager->addError(__('Start Time must be earlier than End Time'));
-                $this->_getSession()->setFormData($data);
-                if ($id) {
-                    return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
-                } else {
-                    return $resultRedirect->setPath('*/*/new', ['_current' => true]);
-                }
-            }
-            
-            //Check if add new and product is selected
-            if (!$id && empty($data['product_ids'])) {
-                $this->messageManager->addError(__('You must select product before saving'));
-                $this->_getSession()->setFormData($data);
-                if ($id) {
-                    return $resultRedirect->setPath('*/*/edit', ['deal_id' => $id, '_current' => true]);
-                } else {
-                    return $resultRedirect->setPath('*/*/new', ['_current' => true]);
-                }
-            }
-
             //Process time
             $localeDate = $this->_objectManager->get('Magento\Framework\Stdlib\DateTime\TimezoneInterface');
             $data['start_time'] = $localeDate->date($data['start_time'])->setTimezone(new \DateTimeZone('UTC'))->format('Y-m-d H:i:s');
@@ -90,18 +65,9 @@ class Save extends \Magento\Backend\App\Action
             }
             $data['progress_status'] = $progressStatus;
             
-            //Process product_ids data and set title when add new
-            
+            //Process product_ids data when add new
             if (!$id) {     
                 $data['product_ids'] = array_keys($this->jsHelper->decodeGridSerializedInput($data['product_ids']));
-                $product = $this->_productFactory->create();
-                $title = '';
-                foreach ($data['product_ids'] as $productId) { 
-                    $product->load($productId);
-                    $title .= $product->getName() . ',';
-                }
-                $title = rtrim($title, ',');
-                $data['title'] = $title;
             }
 
             $deal->setData($data);

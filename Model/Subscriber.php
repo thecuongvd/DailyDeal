@@ -48,8 +48,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
     
     public function isExistedEmail($email) {
         $collection = $this->getCollection()
-                ->addFieldToFilter('email', $email)
-                ->addFieldToFilter('status', self::STATUS_ENABLED);
+                ->addFieldToFilter('email', $email);
         if ($collection->getSize() > 0) {
             return true;
         } else {

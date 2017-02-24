@@ -23,6 +23,22 @@ class Index extends Action
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Daily Deals'));
+        // Add breadcrumb
+        /** @var \Magento\Theme\Block\Html\Breadcrumbs */
+        $breadcrumbs = $resultPage->getLayout()->getBlock('breadcrumbs');
+        $breadcrumbs->addCrumb('home',
+            [
+                'label' => __('Home'),
+                'title' => __('Home'),
+                'link' => $this->_url->getUrl('')
+            ]
+        );
+        $breadcrumbs->addCrumb('dailydeal',
+            [
+                'label' => __('Dailydeal'),
+                'title' => __('Dailydeal')
+            ]
+        );
         return $resultPage;
 
     }

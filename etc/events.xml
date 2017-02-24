@@ -8,5 +8,13 @@
     <event name="sales_order_place_after">
         <observer name="magebuzz_dailydeal_after_place_order" instance="Magebuzz\Dailydeal\Observer\AfterOrderPlaced" />
     </event>
-
+    <event name="controller_action_predispatch_checkout_cart_add">
+        <observer name="magebuzz_dailydeal_cart_add_before" instance="Magebuzz\Dailydeal\Observer\BeforeAddToCart" />
+    </event>
+    <event name="controller_action_predispatch_checkout_cart_updateItemOptions">
+        <observer name="magebuzz_dailydeal_cart_add_before" instance="Magebuzz\Dailydeal\Observer\BeforeUpdateItem" />
+    </event>
+    <event name="controller_action_predispatch_checkout_cart_updatePost">
+        <observer name="magebuzz_dailydeal_cart_add_before" instance="Magebuzz\Dailydeal\Observer\BeforeUpdateItems" />
+    </event>
 </config>

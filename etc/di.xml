@@ -33,13 +33,6 @@
             <argument name="resourceModel" xsi:type="string">Magebuzz\Dailydeal\Model\ResourceModel\Deal</argument>
         </arguments>
     </virtualType>
-    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
-        <arguments>
-            <argument name="collections" xsi:type="array">
-                <item name="dailydeal_deal_listing_data_source" xsi:type="string">Magebuzz\Dailydeal\Model\ResourceModel\Deal\Grid\Collection</item>
-            </argument>
-        </arguments>
-    </type>
     
     <!--Subscriber-->
     <preference for="Magebuzz\Dailydeal\Api\Data\SubscriberInterface" type="Magebuzz\Dailydeal\Model\Subscriber" />
@@ -58,6 +51,7 @@
     <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
         <arguments>
             <argument name="collections" xsi:type="array">
+                <item name="dailydeal_deal_listing_data_source" xsi:type="string">Magebuzz\Dailydeal\Model\ResourceModel\Deal\Grid\Collection</item>
                 <item name="dailydeal_subscriber_listing_data_source" xsi:type="string">Magebuzz\Dailydeal\Model\ResourceModel\Subscriber\Grid\Collection</item>
             </argument>
         </arguments>

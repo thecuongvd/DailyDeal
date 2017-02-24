@@ -24,14 +24,13 @@ class ProductListGetFinalPrice implements ObserverInterface {
             foreach ($products->getItems() as $product) {
                 if ($this->getScopeConfig('dailydeal/general/enable')) {
                     $deal = $this->_dealFactory->create()->loadByProductId($product->getId());
-                    if ($deal->getId()) {
+                    if ($deal->getId() && $deal->isAvailable()) {
                         $startTime = date('Y-m-d H:i:s', strtotime($deal->getStartTime()) - 86400);
                         $endTime = date('Y-m-d H:i:s', strtotime($deal->getEndTime()) - 86400);
                         $product->setSpecialFromDate($startTime);
                         $product->setSpecialToDate($endTime);
-                        if ($deal->isAvailable()) {
-                            $product->setSpecialPrice($deal->getPrice());
-                        }
+                        $product->setSpecialPrice($deal->getPrice());
+                        $product->setFinalPrice($deal->getPrice());
                     }
                 } 
             }

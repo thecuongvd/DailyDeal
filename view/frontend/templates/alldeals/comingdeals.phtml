@@ -1,10 +1,11 @@
 <!--@copyright Copyright (c) 2016 www.magebuzz.com-->
 <div class="grid-deals">
     <div class="all-deals">
-        <div id="today-deals">
+        <div class="toolbar"><?php echo $block->getPagerHtml(); ?></div>
+        <div id="coming-deals">
             <div class="list-deals">
                 <?php
-                $deals = $block->getComingDealCollection();
+                $deals = $block->getPagedDeals();
                 if ($deals->getSize()) {
                     $helper = $block->getHelper();
                     $prdCount = 0;
@@ -75,5 +76,6 @@
                 <?php } ?>
             </div>
         </div>
+        <div class="toolbar"><?php echo $block->getPagerHtml(); ?></div>
     </div>
 </div>

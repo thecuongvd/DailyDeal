@@ -41,14 +41,51 @@ class Main extends Generic
             'base_fieldset', ['legend' => __('Deal Information'), 'class' => 'fieldset-wide']
         );
 
-        if ($dealId) {
+        if ($dealId) {                                                          //Edit
             $fieldset->addField('deal_id', 'hidden', ['name' => 'deal_id']);
-        } 
+            $productIds = $deal->getProductIds();
+            if ($productIds && is_array($productIds) && count($productIds) > 0) {
+                $deal->setData('prd_price', $deal->getProductPrice());
+                $deal->setData('prd_qty', $deal->getProductQty());
+            }
+        } else {                                                                //Add new
+            $fieldset->addField('is_select_product', 'hidden', [
+                'name' => 'is_select_product',
+                'class' => __('validate-is-select-product')
+                ]);
+        }
+
+        $fieldset->addField(
+            'prd_price', 'text', [
+                'name' => 'prd_price',
+                'label' => __('Product Price ('.$this->_dailydealHelper->getCurrencySymbol().')'),
+                'title' => __('Product Price'),
+                'readonly' => 'readonly',
+                'style' => 'border-width: 1px !important'
+            ]
+        );
+        $fieldset->addField(
+            'prd_qty', 'text', [
+                'name' => 'prd_qty',
+                'label' => __('Quantity in Stock'),
+                'title' => __('Quantity in Stock'),
+                'readonly' => 'readonly'
+            ]
+        );
 
         $dateFormat = $this->_localeDate->getDateFormat(\IntlDateFormatter::SHORT);
         $timeFormat = $this->_localeDate->getTimeFormat(\IntlDateFormatter::SHORT);
         $style = 'color: #000;background-color: #fff; font-weight: bold; font-size: 13px;';
-
+        
+        $fieldset->addField(
+            'title', 'text', [
+                'name' => 'title',
+                'label' => __('Deal Title'),
+                'title' => __('Deal Title'),
+                'required' => true
+            ]
+        );
+        
         $fieldset->addField(
             'start_time', 'date', [
                 'name' => 'start_time',
@@ -70,7 +107,7 @@ class Main extends Generic
                 'title' => __('End Time'),
                 'style' => $style,
                 'required' => true,
-                'class' => __('validate-date'),
+                'class' => __('validate-date validate-valid-time'),
                 'date_format' => $dateFormat,
                 'time_format' => $timeFormat,
                 'note' => $this->_localeDate->getDateTimeFormat(\IntlDateFormatter::SHORT),
@@ -83,7 +120,7 @@ class Main extends Generic
                 'label' => __('Deal Price'),
                 'title' => __('Deal Price'),
                 'required' => true,
-                'class' => __('validate-zero-or-greater'),
+                'class' => __('validate-zero-or-greater validate-price'),
                 'style' => 'border-width: 1px !important'
             ]
         );
@@ -93,11 +130,11 @@ class Main extends Generic
                 'label' => __('Quantity for sale via Daily Deal'),
                 'title' => __('Quantity for sale via Daily Deal'),
                 'required' => true,
-                'class' => __('validate-greater-than-zero')
+                'class' => __('validate-greater-than-zero validate-quantity')
             ]
         );
 
-        if (!$this->_storeManager->hasSingleStore()) { 
+        if (!$this->_storeManager->hasSingleStore()) {
             $field = $fieldset->addField(
                 'select_stores', 'multiselect', [
                     'label' => __('Store View'),
@@ -120,7 +157,10 @@ class Main extends Generic
             );
             $deal->setSelectStores($this->_storeManager->getStore(true)->getId());
         }
-
+        
+        $currencySymbol = $this->_dailydealHelper->getCurrencySymbol();
+        $getJs = $dealId ? '' : $this->_getProductInfo($currencySymbol);
+        $getJs .= $this->_addValidation();
         $fieldset->addField(
             'status', 'select', [
                 'name' => 'status',
@@ -128,6 +168,7 @@ class Main extends Generic
                 'title' => __('Status'),
                 'required' => true,
                 'options' => [\Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED => __('Enabled'), \Magebuzz\Dailydeal\Model\Deal::STATUS_DISABLED => __('Disabled')],
+                'after_element_html' => $getJs,
             ]
         );
 
@@ -139,6 +180,99 @@ class Main extends Generic
         $this->setForm($form);
 
         return parent::_prepareForm();
+    }
+    
+    protected function _getProductInfo($currencySymbol)
+    {
+        return <<<HTML
+    <script type='text/javascript'>
+        require(['jquery'], function ($) {
+            $(document).ready(function () {
+                var currencySymbol = '$currencySymbol';
+                $('body').on('click', 'table#deal_product_grid_table tbody tr._clickable', function() {
+                    var checkboxes = $('table#deal_product_grid_table').children('tbody').find('input:checkbox:checked');
+                    if (checkboxes.length == 0) {
+                        $('#deal_prd_price').val('');
+                        $('#deal_prd_qty').val('');
+                        $('#deal_is_select_product').val('');
+                    }
+                    else if (checkboxes.length == 1) {
+                        var price = checkboxes.closest('tr').children('td.col-product_price').text().trim();
+                        price = price.split(currencySymbol).join('');
+                        var qty = checkboxes.closest('tr').children('td.col-product_qty').text().trim();
+                        $('#deal_prd_price').val(price);
+                        $('#deal_prd_qty').val(qty);
+                        $('#deal_is_select_product').val('1');
+                    } else {
+                        var priceArr = [];
+                        var qtyTotal = 0;
+                        checkboxes.each(function() {
+                            var price = $(this).closest('tr').children('td.col-product_price').text().trim();
+                            price = price.split(currencySymbol).join('');
+                            var qty = $(this).closest('tr').children('td.col-product_qty').text().trim();
+                            priceArr.push(price);
+                            qtyTotal += parseFloat(qty);
+                        });
+                        var minPrice = calMin(priceArr);
+                        $('#deal_prd_price').val(minPrice);
+                        $('#deal_prd_qty').val(qtyTotal);
+                        $('#deal_is_select_product').val('1');
+                    }
+                });
+                
+                function calMin(arr) {
+                    var min = arr.pop();
+                    for (var i in arr) {
+                        if (parseFloat(arr[i]) < min) {
+                            min = parseFloat(arr[i]);
+                        }
+                    }
+                    return min;
+                }
+            });
+        });
+    </script>
+HTML;
+    }
+    
+    protected function _addValidation()
+    {
+        return <<<HTML
+    <script type='text/javascript'>
+        require(['jquery', 'jquery/ui', 'jquery/validate', 'mage/translate' ], function($){ 
+            $.validator.addMethod('validate-valid-time', function (value) {
+                var startTime = $('#deal_start_time').val();
+                startTime = (new Date(startTime)).getTime();
+                var endTime = $('#deal_end_time').val();
+                endTime = (new Date(endTime)).getTime();
+                if (startTime && endTime) {
+                    return (startTime < endTime); 
+                } else {
+                    return true;
+                }
+            }, $.mage.__('End Time must be later than Start Time'));
+            $.validator.addMethod('validate-is-select-product', function (value) {
+                return value;
+            }, $.mage.__('You must select product before saving'));
+            $.validator.addMethod('validate-price', function (value) {
+                var productPrice = $('#deal_prd_price').val();
+                if (productPrice && value) {
+                    return (parseFloat(value) < parseFloat(productPrice)); 
+                } else {
+                    return true;
+                }
+            }, $.mage.__('Price of Deal must be smaller than Product Price'));
+            $.validator.addMethod('validate-quantity', function (value) {
+                var productQty = $('#deal_prd_qty').val();
+                if (productQty && value) {
+                    return (parseFloat(value) <= parseFloat(productQty)); 
+                } else {
+                    return true;
+                }
+            }, $.mage.__('Quantity of Deal must be equal or smaller than Quantity in Stock'));
+        });
+    </script>
+HTML;
     }
 
 }

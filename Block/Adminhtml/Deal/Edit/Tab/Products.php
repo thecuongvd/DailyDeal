@@ -8,6 +8,8 @@ namespace Magebuzz\Dailydeal\Block\Adminhtml\Deal\Edit\Tab;
 class Products extends \Magento\Backend\Block\Widget\Grid\Extended
 {
     protected $_coreRegistry = null;
+    protected $_scopeConfig;
+    protected $_storeManager;
     protected $_dealFactory;
     protected $_linkFactory;
     protected $_productStatus;
@@ -22,6 +24,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
         \Magento\Backend\Block\Template\Context $context,
         \Magento\Backend\Helper\Data $backendHelper,
         \Magento\Framework\Registry $coreRegistry,
+        \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
+        \Magento\Store\Model\StoreManagerInterface $storeManager,
         \Magebuzz\Dailydeal\Model\DealFactory $dealFactory,
         \Magento\Catalog\Model\Product\LinkFactory $linkFactory,
         \Magento\Catalog\Model\Product\Attribute\Source\Status $productStatus,
@@ -35,6 +39,8 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
     )
     {
         $this->_coreRegistry = $coreRegistry;
+        $this->_scopeConfig = $scopeConfig;
+        $this->_storeManager = $storeManager;
         $this->_dealFactory = $dealFactory;
         $this->_linkFactory = $linkFactory;
         $this->_productStatus = $productStatus;
@@ -102,7 +108,9 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
             $excludedPrdType = ['configurable', 'bundle', 'grouped'];
             $collection->addAttributeToFilter('type_id', ['nin' => $excludedPrdType]);
             $collection->addAttributeToFilter('status', ['in' => $this->_productStatus->getVisibleStatusIds()]);
-            $collection->addAttributeToFilter('is_deal', 1);
+            if ($this->getScopeConfig('dailydeal/general/apply_is_deal')) {
+                $collection->addAttributeToFilter('is_deal', 1);
+            }
         }
            
         //Add Quantity of Product
@@ -120,6 +128,17 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
         $collection->addWebsiteNamesToResult();
         $this->setCollection($collection);
         return parent::_prepareCollection();
+    }
+    
+    public function getCurrentStoreId() 
+    {
+        return $this->_storeManager->getStore(true)->getId();
+    } 
+    
+    public function getScopeConfig($path)
+    {
+        $storeId = $this->getCurrentStoreId();
+        return $this->_scopeConfig->getValue($path, \Magento\Store\Model\ScopeInterface::SCOPE_STORE, $storeId);
     }
     
     /**
@@ -265,7 +284,7 @@ class Products extends \Magento\Backend\Block\Widget\Grid\Extended
                     \Magento\Directory\Model\Currency::XML_PATH_CURRENCY_BASE,
                     \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                 ),
-                'index' => 'price',
+                'index' => 'price'
             ]
         );
         if ($this->moduleManager->isEnabled('Magento_CatalogInventory')) {

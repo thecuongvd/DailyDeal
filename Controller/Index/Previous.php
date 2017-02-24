@@ -23,6 +23,29 @@ class Previous extends Action
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Previous Deals'));
+        // Add breadcrumb
+        /** @var \Magento\Theme\Block\Html\Breadcrumbs */
+        $breadcrumbs = $resultPage->getLayout()->getBlock('breadcrumbs');
+        $breadcrumbs->addCrumb('home',
+            [
+                'label' => __('Home'),
+                'title' => __('Home'),
+                'link' => $this->_url->getUrl('')
+            ]
+        );
+        $breadcrumbs->addCrumb('dailydeal',
+            [
+                'label' => __('Dailydeal'),
+                'title' => __('Dailydeal'),
+                'link' => $this->_url->getUrl('dailydeal')
+            ]
+        );
+        $breadcrumbs->addCrumb('previousdeal',
+            [
+                'label' => __('Previous Deal'),
+                'title' => __('Previous Deal')
+            ]
+        );
         return $resultPage;
 
     }

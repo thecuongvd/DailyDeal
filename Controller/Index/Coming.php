@@ -23,6 +23,29 @@ class Coming extends Action
     {
         $resultPage = $this->resultPageFactory->create();
         $resultPage->getConfig()->getTitle()->set(__('Coming Deals'));
+        // Add breadcrumb
+        /** @var \Magento\Theme\Block\Html\Breadcrumbs */
+        $breadcrumbs = $resultPage->getLayout()->getBlock('breadcrumbs');
+        $breadcrumbs->addCrumb('home',
+            [
+                'label' => __('Home'),
+                'title' => __('Home'),
+                'link' => $this->_url->getUrl('')
+            ]
+        );
+        $breadcrumbs->addCrumb('dailydeal',
+            [
+                'label' => __('Dailydeal'),
+                'title' => __('Dailydeal'),
+                'link' => $this->_url->getUrl('dailydeal')
+            ]
+        );
+        $breadcrumbs->addCrumb('comingdeal',
+            [
+                'label' => __('Coming Deal'),
+                'title' => __('Coming Deal')
+            ]
+        );
         return $resultPage;
 
     }

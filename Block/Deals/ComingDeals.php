@@ -11,6 +11,7 @@ class ComingDeals extends \Magento\Framework\View\Element\Template
     protected $_scopeConfig;
     protected $_storeManager;
     protected $_dailydealHelper;
+    protected $_deals;
 
     public function __construct(
         \Magento\Framework\View\Element\Template\Context $context,
@@ -26,6 +27,8 @@ class ComingDeals extends \Magento\Framework\View\Element\Template
         $this->_scopeConfig = $scopeConfig;
         $this->_storeManager = $storeManager;
         $this->_dailydealHelper = $dailydealHelper;
+        
+        $this->_deals = $this->getComingDealCollection();
     }
 
     public function getIdentities()
@@ -62,12 +65,32 @@ class ComingDeals extends \Magento\Framework\View\Element\Template
         $collection = $this->_dealFactory->create()->getCollection()
             ->addFieldToFilter('status', \Magebuzz\Dailydeal\Model\Deal::STATUS_ENABLED)
             ->setComingFilter()
-            ->setRemain()
             ->setStoreFilter($storeIds)
-            ->setOrder('price', 'ASC');
+            ->setOrder('start_time', 'ASC');
         return $collection;
     }
 
+    public function getPagedDeals()
+    {
+        return $this->_deals;
+    }
     
+    public function getPagerHtml()
+    {
+        return $this->getChildHtml('pager');
+    }
+    
+    protected function _prepareLayout()
+    {
+        parent::_prepareLayout();
+        if ($this->_deals) {
+            $pager = $this->getLayout()->createBlock('Magento\Theme\Block\Html\Pager', 'dailydeal.deal.coming.pager')
+                ->setAvailableLimit([10 => 10, 20 => 20, 50 => 50, 100 => 100])
+                ->setCollection($this->_deals);
+            $this->setChild('pager', $pager);
+            $this->_deals->load();
+        }
+        return $this;
+    }
     
 }
